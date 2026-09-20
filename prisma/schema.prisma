@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+model Game {
+  id        String @id @default("main")
+  state     String
+  history   String @default("[]")
+  updatedAt DateTime @updatedAt
+}
+model Session {
+  id        String @id
+  role      String
+  name      String
+  playerId  String?
+  expiresAt DateTime
+}
+model Question {
+  id        String @id
+  round     Int
+  category  String
+  active    Boolean @default(true)
+  position  Int @default(0)
+  data      String
+  updatedAt DateTime @updatedAt
+}
+model Category {
+  id    String @id
+  name  String
+  round Int
+  @@unique([name, round])
+}
+model Media {
+  id           String @id
+  filename     String @unique
+  mime         String
+  size         Int
+  originalName String
+  createdAt    DateTime @default(now())
+}
+model Setting {
+  id   String @id @default("main")
+  data String
+}
+model Event {
+  id        Int @id @default(autoincrement())
+  at        DateTime @default(now())
+  type      String
+  message   String
+  revision  Int
+}

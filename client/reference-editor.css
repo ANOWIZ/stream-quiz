@@ -1,0 +1,43 @@
+
+
+  #ed{max-width:1100px;margin:0 auto;padding:18px 16px 80px}
+  .ed-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+  .ed-head h1{font-size:22px;margin:0}
+  .ed-note{color:var(--muted);font-size:13px}
+  .ed-warn{background:#3a2230;border:1px solid #7a2230;color:#ffb3bd;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-weight:600}
+  .ed-legend{background:#241d16;border:1px solid #5a4420;color:#e8d9b8;border-radius:10px;padding:9px 14px;margin-bottom:14px;font-size:13px;line-height:1.4}
+  .add-img.uploading{opacity:.5;pointer-events:none}
+  .ed-ver{margin-left:auto;font-size:12px;color:#5fd08a;font-weight:700;background:#10331f;border:1px solid #1f7a45;border-radius:20px;padding:3px 12px}
+  .add-img{width:auto;min-width:70px;padding:0 12px;gap:6px;font-size:14px;font-weight:700}
+  .imgs.drag{outline:2px dashed var(--accent);outline-offset:3px;border-radius:8px}
+  .rtabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .rtab{padding:8px 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-weight:700;cursor:pointer}
+  .rtab.active{background:var(--accent);color:#1a1200;border-color:var(--accent)}
+  .theme{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px}
+  .theme-head{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+  .theme-head input{flex:1;font-size:17px;font-weight:700;background:#0f1522;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px 10px}
+  .mini{padding:5px 9px;border-radius:7px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-weight:700;cursor:pointer;font-size:13px}
+  .mini:hover{border-color:var(--accent2)}
+  .mini.danger:hover{border-color:var(--red)}
+  .q{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:9px;background:#0f1522}
+  .q-top{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+  .q-top .price{width:90px;background:#0b0e17;border:1px solid var(--line);color:var(--accent);font-weight:800;border-radius:7px;padding:6px 8px;font-size:15px}
+  .q-top .spacer{flex:1}
+  .q-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:760px){.q-grid{grid-template-columns:1fr}}
+  .fld label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+  .fld textarea,.fld input[type=text]{width:100%;background:#0b0e17;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px;font-size:15px;font-family:inherit;resize:vertical}
+  .imgs{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;align-items:center}
+  .imgs .thumb{position:relative}
+  .imgs .thumb img{height:70px;border-radius:8px;border:1px solid var(--line);display:block}
+  .imgs .thumb .x{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;border:none;background:var(--red);color:#fff;font-weight:800;cursor:pointer;line-height:1}
+  .add-img{border:1px dashed var(--line);border-radius:8px;height:70px;width:70px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;font-size:24px}
+  .add-img:hover{border-color:var(--accent)}
+  .secret-toggle{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none}
+  .addq{margin-top:6px}
+  #save-flash{position:fixed;bottom:16px;right:16px;background:var(--green);color:#04240f;font-weight:800;padding:10px 18px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none}
+  #save-flash.on{opacity:1}
+  .login-card2{max-width:360px;margin:80px auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px;text-align:center}
+  .login-card2 input{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:1px solid var(--line);background:#0f1522;color:var(--txt);font-size:16px}
+  .login-card2 button{width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent);color:#1a1200;font-weight:800;font-size:16px;cursor:pointer}
+  .login-card2 .err{color:var(--red);min-height:18px;font-size:13px;margin-top:8px}
