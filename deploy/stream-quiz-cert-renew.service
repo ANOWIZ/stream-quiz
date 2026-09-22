@@ -1,0 +1,9 @@
+[Unit]
+Description=Renew the Stream Quiz HTTPS certificate
+Wants=network-online.target
+After=network-online.target docker.service nginx.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/docker run --rm -v /etc/letsencrypt:/etc/letsencrypt -v /var/lib/letsencrypt:/var/lib/letsencrypt certbot/certbot:v5.8.0 renew --quiet
+ExecStartPost=/usr/sbin/nginx -s reload
