@@ -4,6 +4,7 @@ import {
   joinPlayer,
   applyCommand,
   activeId,
+  addPoints,
 } from "../server/game.js";
 import { demoQuestions } from "../server/content.js";
 import { v2Fixture } from "./v2-fixture.js";
@@ -86,4 +87,126 @@ it("новая очередь продолжается при ручном пе�
   for (let r = 2; r < 6; r++) send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
   expect(s.round).toBe(6);
   expect(() => send("nextRound", "СЛЕДУЮЩИЙ РАУНД")).toThrow();
+});
+
+it.each([1, 2])(
+  "возврат v%s отменяет оба раунда, сохраняет ранние очки и ручные поправки",
+  (version) => {
+    const f = v2Fixture();
+    const s = version === 2 ? f.state : initialState();
+    const bank = version === 2 ? f.questions : demoQuestions();
+    if (version === 1) joinPlayer(s, "А");
+    const send = (type: string, value?: unknown) =>
+      applyCommand(s, host, { type, value }, bank, 1000);
+    const id = s.players[0].id;
+    expect(() => send("previousRound", "ПРЕДЫДУЩИЙ РАУНД")).toThrow();
+    send("start");
+    expect(() => send("previousRound", "ПРЕДЫДУЩИЙ РАУНД")).toThrow();
+    addPoints(s, id, 100);
+    send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
+    const checkpoint = structuredClone(s.roundCheckpoint);
+    const snapshot = structuredClone(s.packageSnapshot);
+    addPoints(s, id, 200);
+    send("score", { playerId: id, amount: 77, reason: "Ручная поправка" });
+    send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
+    addPoints(s, id, -50);
+    const epoch = s.roundEpoch;
+    expect(() => send("previousRound")).toThrow();
+    expect(() =>
+      applyCommand(
+        s,
+        { ...host, role: "player", playerId: id },
+        { type: "previousRound", value: "ПРЕДЫДУЩИЙ РАУНД" },
+        bank,
+        1000,
+      ),
+    ).toThrow();
+    send("previousRound", "ПРЕДЫДУЩИЙ РАУНД");
+    expect(s).toMatchObject({
+      round: 2,
+      roundIndex: 1,
+      phase: "intro",
+      completed: 0,
+      roundCheckpoint: checkpoint,
+      used: checkpoint!.used,
+      boardIds: checkpoint!.boardIds,
+    });
+    expect(s.players[0].score).toBe(177);
+    expect(s.packageSnapshot).toEqual(snapshot);
+    expect(s.roundEpoch).not.toBe(epoch);
+    expect(Object.keys(s.roundCheckpoints)).toEqual(["1"]);
+    addPoints(s, id, 200);
+    send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
+    addPoints(s, id, -50);
+    send("previousRound", "ПРЕДЫДУЩИЙ РАУНД");
+    expect(s.players[0].score).toBe(177);
+    send("previousRound", "ПРЕДЫДУЩИЙ РАУНД");
+    expect(s.players[0].score).toBe(77);
+    expect(s.round).toBe(1);
+    expect(s.used).toEqual([]);
+    expect(s.roundCheckpoints).toEqual({});
+  },
+);
+
+it("возврат учитывает отмену начислений незавершённого вопроса при переходе вперёд", () => {
+  const { state: s, send, questions } = v2Fixture();
+  send("start");
+  for (let i = 1; i < 4; i++) send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
+  send("begin");
+  const q = questions.find((q) => q.round === 4)!;
+  send("choose", q.id);
+  const id = activeId(s)!;
+  send("buzz", undefined, id);
+  send("judge", false);
+  expect(s.players.find((p) => p.id === id)!.score).toBeLessThan(0);
+  send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
+  expect(s.roundCheckpoints[4].awards[id]).toBe(0);
+  send("previousRound", "ПРЕДЫДУЩИЙ РАУНД");
+  expect(s.players.every((p) => p.score === 0)).toBe(true);
+});
+
+it("возврат из завершённого финала очищает попытку и сохраняет выбранную панораму", () => {
+  const { state: s, send } = v2Fixture();
+  send("start");
+  for (let i = 1; i < 5; i++) send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
+  const id = s.players[0].id;
+  addPoints(s, id, 1000);
+  send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
+  const final = structuredClone(s.finalSelection);
+  send("begin");
+  addPoints(s, id, -1000);
+  s.phase = "finished";
+  s.bets[id] = 1000;
+  s.countries[id] = { code: "RU", locked: true };
+  s.panoramaReady[id] = true;
+  send("previousRound", "ПРЕДЫДУЩИЙ РАУНД");
+  expect(s).toMatchObject({
+    round: 5,
+    phase: "intro",
+    question: null,
+    questionPublicId: null,
+    scoreBefore: {},
+    answers: {},
+    bets: {},
+    countries: {},
+    panoramaReady: {},
+    finalAttemptId: null,
+    timer: { deadline: null, remaining: null },
+  });
+  expect(s.players[0].score).toBe(0);
+  expect(s.finalSelection).toEqual(final);
+});
+
+it("предыдущий раунд следует настроенному порядку старых правил", () => {
+  const s = initialState();
+  s.config.roundOrder = [3, 1, 2, 4, 5, 6];
+  const bank = demoQuestions();
+  const send = (type: string, value?: unknown) =>
+    applyCommand(s, host, { type, value }, bank, 1000);
+  send("start");
+  send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
+  expect(s.round).toBe(1);
+  send("previousRound", "ПРЕДЫДУЩИЙ РАУНД");
+  expect(s.round).toBe(3);
+  expect(s.roundIndex).toBe(0);
 });

@@ -5,13 +5,15 @@ import {
   syncLegacyRoundBank,
 } from "./game.js";
 import type { GameState } from "../shared/types.js";
-import type { Question } from "../shared/content.js";
+import { questionSchema, type Question } from "../shared/content.js";
 import {
   configSchema,
   defaultConfig,
   upgradeConfig,
+  PLAYER_COLORS,
 } from "../shared/config.js";
 import { packageSchema, type GamePackage } from "../shared/packages.js";
+import { recoverRoundCheckpoints } from "./round-checkpoints.js";
 export class Store {
   state = initialState();
   history: GameState[] = [];
@@ -38,6 +40,27 @@ export class Store {
       await this.save("Создана комната");
     }
     this.state = { ...initialState(), ...this.state };
+    const paletteVersion = await this.db.setting.findUnique({
+      where: { id: "player-palette-v2" },
+    });
+    if (!paletteVersion) {
+      for (const state of [this.state, ...this.history])
+        state.players.forEach((p, index) => {
+          p.color = PLAYER_COLORS[index];
+        });
+      await this.db.$transaction([
+        this.db.game.update({
+          where: { id: "main" },
+          data: {
+            state: JSON.stringify(this.state),
+            history: JSON.stringify(this.history),
+          },
+        }),
+        this.db.setting.create({
+          data: { id: "player-palette-v2", data: "true" },
+        }),
+      ]);
+    }
     const upgradeBetLimit = this.state.config.final.betLimit !== 1;
     this.state.config = configSchema.parse(this.state.config);
     this.history = this.history.map((s) => ({
@@ -96,6 +119,14 @@ export class Store {
         this.state.roundCheckpoint = checkpoint;
       }
     }
+    if (recoverRoundCheckpoints(this.state, this.history))
+      await this.db.game.update({
+        where: { id: "main" },
+        data: {
+          state: JSON.stringify(this.state),
+          history: JSON.stringify(this.history),
+        },
+      });
     await this.refreshPackages();
     await this.refreshEvents();
     if (upgradeBetLimit) {
@@ -137,26 +168,76 @@ export class Store {
           ? structuredClone(selected)
           : null;
     }
+    await this.refreshPackages();
   }
   async refreshEvents() {
     this.events = (
-      await this.db.event.findMany({ orderBy: { id: "desc" }, take: 80 })
+      await this.db.event.findMany({
+        where: { type: "score_change" },
+        orderBy: { id: "desc" },
+        take: 80,
+      })
     ).map((e) => ({ id: e.id, message: e.message, at: e.at.toISOString() }));
   }
   async refreshPackages() {
-    this.packages = (
+    const packages = (
       await this.db.setting.findMany({
         where: { id: { startsWith: "package:" } },
       })
     ).map((row) => packageSchema.parse(JSON.parse(row.data)));
+    const published = new Map(this.bank.map((q) => [q.id, q]));
+    const changed: GamePackage[] = [];
+    for (const pack of packages) {
+      const questions = pack.questions.map((q) =>
+        questionSchema.parse(published.get(q.id) ?? q),
+      );
+      if (JSON.stringify(questions) === JSON.stringify(pack.questions))
+        continue;
+      pack.questions = questions;
+      pack.revision++;
+      pack.updatedAt = new Date().toISOString();
+      changed.push(pack);
+    }
+    if (changed.length)
+      await this.db.$transaction(
+        changed.map((pack) =>
+          this.db.setting.update({
+            where: { id: "package:" + pack.id },
+            data: { data: JSON.stringify(pack) },
+          }),
+        ),
+      );
+    // Only library versions are refreshed; the running game's snapshot is fixed.
+    this.packages = packages;
   }
   serial<T>(fn: () => Promise<T>): Promise<T> {
     const next = this.tail.then(fn);
     this.tail = next.catch(() => {});
     return next;
   }
-  async save(message: string) {
+  async save(_message: string, before?: GameState, clearScoreLog = false) {
+    const removedPlayerIds =
+      before?.players
+        .filter((player) => !this.state.players.some((p) => p.id === player.id))
+        .map((player) => player.id) ?? [];
+    const changedScores = clearScoreLog
+      ? []
+      : this.state.players.flatMap((p) => {
+          const old = before?.players.find((old) => old.id === p.id);
+          const delta = old ? p.score - old.score : 0;
+          return delta ? [{ name: p.name, delta }] : [];
+        });
     await this.db.$transaction([
+      ...(clearScoreLog
+        ? [this.db.event.deleteMany({ where: { type: "score_change" } })]
+        : []),
+      ...(removedPlayerIds.length
+        ? [
+            this.db.session.deleteMany({
+              where: { role: "player", playerId: { in: removedPlayerIds } },
+            }),
+          ]
+        : []),
       this.db.game.upsert({
         where: { id: "main" },
         create: {
@@ -182,17 +263,38 @@ export class Store {
             }),
           ]
         : []),
-      this.db.event.create({
-        data: {
-          type: this.state.phase,
-          message,
-          revision: this.state.revision,
-        },
-      }),
+      ...changedScores.map(({ name, delta }) =>
+        this.db.event.create({
+          data: {
+            type: "score_change",
+            message:
+              name +
+              ": " +
+              (delta > 0 ? "+" : "−") +
+              Math.abs(delta) +
+              " очков",
+            revision: this.state.revision,
+          },
+        }),
+      ),
+      ...this.state.players
+        .filter((p) =>
+          before?.players.some((old) => old.id === p.id && old.name !== p.name),
+        )
+        .map((p) =>
+          this.db.session.updateMany({
+            where: { playerId: p.id },
+            data: { name: p.name },
+          }),
+        ),
     ]);
     await this.refreshEvents();
   }
-  async mutate(fn: () => string | Promise<string>, remember = true) {
+  async mutate(
+    fn: () => string | Promise<string>,
+    remember = true,
+    clearScoreLog = false,
+  ) {
     const before = structuredClone(this.state);
     const oldHistory = [...this.history];
     try {
@@ -211,7 +313,7 @@ export class Store {
         this.history.push(before);
         this.history = this.history.slice(-30);
       }
-      await this.save(msg);
+      await this.save(msg, before, clearScoreLog);
       this.onChange();
       return msg;
     } catch (e) {

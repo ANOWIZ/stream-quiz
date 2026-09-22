@@ -1,5 +1,9 @@
 import type { GeoPoint } from "../shared/content.js";
-import { interiorPoint, containsPoint } from "../shared/geography.js";
+import {
+  interiorPoint,
+  containsPoint,
+  WORLD_MAP_VERSION,
+} from "../shared/geography.js";
 import {
   useEffect,
   useMemo,
@@ -43,6 +47,7 @@ export function WorldMap({
   picks = [],
   correct,
   disabled = false,
+  showResultHint = true,
   fullscreenActions,
 }: {
   selected?: string | null;
@@ -52,17 +57,28 @@ export function WorldMap({
   picks?: Pick[];
   correct?: string;
   disabled?: boolean;
+  showResultHint?: boolean;
   fullscreenActions?: ReactNode;
 }) {
   const [data, setData] = useState<World | null>(cached);
-  const [filter, setFilter] = useState("");
   const [view, setView] = useState(initialView);
   const viewRef = useRef(view);
   const { zoom } = view;
   const [fullscreen, setFullscreen] = useState(false);
   const svgRef = useRef<SVGSVGElement>(null);
+  const [labelScale, setLabelScale] = useState(1);
   const expandRef = useRef<HTMLButtonElement>(null);
   const restoreFocus = useRef(false);
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const observer = new ResizeObserver(() => {
+      const matrix = svg.getScreenCTM();
+      if (matrix?.a) setLabelScale(1 / Math.abs(matrix.a));
+    });
+    observer.observe(svg);
+    return () => observer.disconnect();
+  }, [fullscreen]);
   const pointers = useRef(new Map<number, MapPoint & { start: MapPoint }>());
   const dragged = useRef(false);
   const changeView = useCallback((next: MapView) => {
@@ -106,7 +122,7 @@ export function WorldMap({
   const [error, setError] = useState("");
   useEffect(() => {
     if (!cached)
-      void fetch("/world.json")
+      void fetch("/world.json?v=" + WORLD_MAP_VERSION)
         .then((r) => r.json())
         .then((d: World) => {
           cached = d;
@@ -127,6 +143,11 @@ export function WorldMap({
     [],
   );
   const path = useMemo(() => geoPath(projection), [projection]);
+  const textMetrics = useMemo(() => {
+    const context = document.createElement("canvas").getContext("2d");
+    if (context) context.font = "700 18px Arial";
+    return context;
+  }, []);
   const select = (f: Feature<Geometry, Props>, point?: GeoPoint) => {
     const chosen = point ?? interiorPoint(f);
     if (!disabled && chosen && containsPoint(f, chosen))
@@ -155,6 +176,69 @@ export function WorldMap({
         ]
       : []),
   ];
+  // Position labels in screen pixels, independently of map zoom. Keep them
+  // inside the viewport and try nearby free space instead of offsetting every
+  // player by a global index (which pushes southern labels off the map).
+  const occupied: { x: number; y: number; width: number; height: number }[] =
+    [];
+  const labels = pins.map((pin) => {
+    const country = data?.features.find((f) => f.properties.code === pin.code);
+    const point = pin.point ?? (country ? interiorPoint(country) : null);
+    const xy = point && projection([point.longitude, point.latitude]);
+    if (!point || !xy) return null;
+    const px = (center.x + view.x + (xy[0] - center.x) * zoom) / labelScale;
+    const py = (center.y + view.y + (xy[1] - center.y) * zoom) / labelScale;
+    const w = 960 / labelScale,
+      h = 500 / labelScale;
+    if (px < 0 || py < 0 || px > w || py > h) return null;
+    const maxWidth = Math.max(40, w - 16);
+    const measure = (text: string) =>
+      textMetrics?.measureText(text).width ?? text.length * 11;
+    const lines: string[] = [""];
+    for (const letter of Array.from(pin.name)) {
+      if (measure(lines[lines.length - 1] + letter) > maxWidth - 14)
+        lines.push(letter);
+      else lines[lines.length - 1] += letter;
+    }
+    const width = Math.min(maxWidth, Math.max(...lines.map(measure)) + 14);
+    const height = lines.length * 22 + 6;
+    let best = { x: 0, y: 0, width, height },
+      penalty = Infinity;
+    for (const offset of [0, 32, -32, 64, -64, 96, -96, 128, -128, 160, -160]) {
+      for (const x of [px + 11, px - width - 11]) {
+        const box = {
+          x: Math.max(4, Math.min(w - width - 4, x)),
+          y: Math.max(4, Math.min(h - height - 4, py - height + offset)),
+          width,
+          height,
+        };
+        const overlaps = occupied.filter(
+          (r) =>
+            box.x < r.x + r.width + 3 &&
+            box.x + width + 3 > r.x &&
+            box.y < r.y + r.height + 3 &&
+            box.y + height + 3 > r.y,
+        ).length;
+        const cost =
+          overlaps * 10000 + Math.abs(offset) + Math.abs(box.x - px) / 10;
+        if (cost < penalty) {
+          best = box;
+          penalty = cost;
+        }
+      }
+    }
+    occupied.push(best);
+    return {
+      pin,
+      point,
+      country,
+      xy,
+      lines,
+      box: best,
+      dx: best.x - px,
+      dy: best.y - py,
+    };
+  });
   const content = (
     <div className={"world-map" + (fullscreen ? " map-fullscreen" : "")}>
       {fullscreen && (
@@ -168,41 +252,9 @@ export function WorldMap({
           </button>
         </header>
       )}
-      <div className="map-tools">
-        {!disabled ? (
-          <label className="map-search">
-            Найти страну
-            <input
-              placeholder="Название страны"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-            />
-          </label>
-        ) : (
+      {disabled && (
+        <div className="map-tools">
           <span className="muted">Страны, которые выбрали игроки</span>
-        )}
-      </div>
-      {filter && (
-        <div className="country-search-results">
-          {data?.features
-            .filter((f) =>
-              f.properties.name
-                .toLocaleLowerCase("ru")
-                .includes(filter.toLocaleLowerCase("ru")),
-            )
-            .slice(0, 12)
-            .map((f) => (
-              <button
-                disabled={disabled}
-                key={f.properties.code}
-                onClick={() => {
-                  select(f);
-                  setFilter("");
-                }}
-              >
-                {f.properties.name}
-              </button>
-            ))}
         </div>
       )}
       {error && <p className="error">{error}</p>}
@@ -387,15 +439,9 @@ export function WorldMap({
                 </path>
               );
             })}
-            {pins.map((pin, index) => {
-              const country = data?.features.find(
-                (f) => f.properties.code === pin.code,
-              );
-              const point =
-                pin.point ?? (country ? interiorPoint(country) : null);
-              if (!point) return null;
-              const xy = projection([point.longitude, point.latitude]);
-              if (!xy) return null;
+            {labels.map((label, index) => {
+              if (!label) return null;
+              const { pin, point, country, xy, lines, box, dx, dy } = label;
               const [x, y] = xy;
               return (
                 <g
@@ -404,7 +450,13 @@ export function WorldMap({
                   data-longitude={point.longitude}
                   data-latitude={point.latitude}
                   transform={
-                    "translate(" + x + " " + y + ") scale(" + 1 / zoom + ")"
+                    "translate(" +
+                    x +
+                    " " +
+                    y +
+                    ") scale(" +
+                    labelScale / zoom +
+                    ")"
                   }
                   pointerEvents="none"
                 >
@@ -414,17 +466,35 @@ export function WorldMap({
                     stroke="#101216"
                     strokeWidth="2"
                   />
-                  <g transform={"translate(9 " + (index * 19 - 8) + ")"}>
+                  <line
+                    x1={0}
+                    y1={0}
+                    x2={dx + box.width / 2}
+                    y2={dy + box.height / 2}
+                    stroke={pin.color}
+                    strokeWidth={1}
+                  />
+                  <g
+                    className="map-pin-label"
+                    transform={`translate(${dx} ${dy})`}
+                  >
                     <rect
-                      x="-2"
-                      y="-12"
                       rx="3"
-                      width={Math.max(75, pin.name.length * 8)}
-                      height="20"
+                      width={box.width}
+                      height={box.height}
                       fill="#101216"
                     />
-                    <text fill={pin.color} fontSize="13" fontWeight="bold">
-                      {pin.name}
+                    <text
+                      fill={pin.color}
+                      fontSize="18"
+                      fontWeight="bold"
+                      fontFamily="Arial, sans-serif"
+                    >
+                      {lines.map((line, i) => (
+                        <tspan key={i} x={7} y={20 + i * 22}>
+                          {line}
+                        </tspan>
+                      ))}
                     </text>
                   </g>
                   <title>
@@ -481,15 +551,17 @@ export function WorldMap({
           </button>
         </div>
       </div>
-      <p className="map-hint">
-        {disabled
-          ? "Салатовый — правильная страна. Имена и цвета — ответы игроков."
-          : selected
-            ? "Выбрано: " +
-              (data?.features.find((f) => f.properties.code === selected)
-                ?.properties.name ?? selected)
-            : "Нажмите на территорию страны. Карту можно увеличить и перемещать."}
-      </p>
+      {(!disabled || showResultHint) && (
+        <p className="map-hint">
+          {disabled
+            ? "Салатовый — правильная страна. Имена и цвета — ответы игроков."
+            : selected
+              ? "Выбрано: " +
+                (data?.features.find((f) => f.properties.code === selected)
+                  ?.properties.name ?? selected)
+              : "Нажмите на территорию страны. Карту можно увеличить и перемещать."}
+        </p>
+      )}
       {fullscreen && fullscreenActions}
     </div>
   );

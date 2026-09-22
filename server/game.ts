@@ -4,16 +4,25 @@ import {
   configSchema,
   defaultConfig,
   PLAYER_COLORS,
+  FINAL_ANSWER_SECONDS,
 } from "../shared/config.js";
 import type { Config } from "../shared/config.js";
 import type { GameState, Identity, Command } from "../shared/types.js";
 import type { Question } from "../shared/content.js";
 import { validateBank } from "./content.js";
 import { roundCommand, scoreQuestion } from "./rounds.js";
-import { finishCountrySelection, finalAnswerSeconds } from "./final.js";
+import { finishCountrySelection } from "./final.js";
 import { beginV2, commandV2, expireV2, prepareRoundV2 } from "./rules-v2.js";
+import { previousRoundCheckpoint } from "./round-checkpoints.js";
 export function requireRule(ok: unknown, message: string): asserts ok {
   if (!ok) throw new Error(message);
+}
+export function canAnswerDuringPause(s: GameState, who: Identity, c: Command) {
+  return (
+    s.round === 6 &&
+    who.role === "player" &&
+    ["bet", "country", "confirmCountry"].includes(c.type)
+  );
 }
 export function initialState(
   config: Config = structuredClone(defaultConfig),
@@ -21,6 +30,7 @@ export function initialState(
   return {
     roundEpoch: null,
     roundCheckpoint: null,
+    roundCheckpoints: {},
     selectedPackageId: null,
     packageSnapshot: null,
     publicIds: {},
@@ -66,21 +76,29 @@ export function initialState(
 export function normalizeName(name: string) {
   return name.normalize("NFKC").trim().toLocaleLowerCase("ru-RU");
 }
-export function joinPlayer(s: GameState, name: string) {
-  requireRule(s.joinOpen, "Вход новых игроков закрыт");
-  requireRule(
-    s.players.length < s.config.maxPlayers,
-    "В комнате уже шесть игроков",
-  );
+function availableName(s: GameState, name: unknown, exceptId?: string) {
+  requireRule(typeof name === "string", "Введите имя");
   const clean = name.normalize("NFKC").trim();
   requireRule(
     clean.length >= 1 && clean.length <= 30 && !/[\p{Cc}\p{Cf}]/u.test(clean),
     "Имя должно содержать от 1 до 30 видимых символов",
   );
   requireRule(
-    !s.players.some((p) => normalizeName(p.name) === normalizeName(clean)),
+    !s.players.some(
+      (p) =>
+        p.id !== exceptId && normalizeName(p.name) === normalizeName(clean),
+    ),
     "Это имя уже занято",
   );
+  return clean;
+}
+export function joinPlayer(s: GameState, name: string) {
+  requireRule(s.joinOpen, "Вход новых игроков закрыт");
+  requireRule(
+    s.players.length < s.config.maxPlayers,
+    "В комнате уже шесть игроков",
+  );
+  const clean = availableName(s, name);
   const player = {
     id: randomUUID(),
     name: clean,
@@ -100,7 +118,9 @@ export function shuffled<T>(a: T[]) {
   return b;
 }
 export function arm(s: GameState, seconds: number, now: number) {
-  s.timer = { deadline: now + seconds * 1000, remaining: null };
+  s.timer = s.paused
+    ? { deadline: null, remaining: seconds * 1000 }
+    : { deadline: now + seconds * 1000, remaining: null };
 }
 export function stopTimer(s: GameState) {
   s.timer = { deadline: null, remaining: null };
@@ -136,6 +156,10 @@ export function clearQuestion(s: GameState) {
   stopTimer(s);
 }
 export function captureRoundStart(s: GameState) {
+  if (s.roundCheckpoint && s.roundCheckpoint.round !== s.round)
+    s.roundCheckpoints[s.roundCheckpoint.round] = structuredClone(
+      s.roundCheckpoint,
+    );
   s.roundCheckpoint = {
     round: s.round,
     used: [...s.used],
@@ -255,7 +279,7 @@ export function expire(s: GameState, now: number): boolean {
   } else if (s.phase === "betting") {
     for (const id of s.roster) if (s.bets[id] === undefined) s.bets[id] = 0;
     s.phase = "locating";
-    arm(s, finalAnswerSeconds(s), now);
+    arm(s, FINAL_ANSWER_SECONDS, now);
   } else if (s.phase === "answering") {
     if (s.round === 3) reveal(s);
     else {
@@ -277,6 +301,43 @@ export function applyCommand(
   now = Date.now(),
   receivedAt = now,
 ): string {
+  if (c.type === "timer") {
+    requireRule(who.role === "host", "Только ведущий меняет таймер");
+    requireRule(
+      s.question &&
+        [
+          "point",
+          "ranges",
+          "answering",
+          "studying",
+          "buzzing",
+          "betting",
+          "loadingPanorama",
+          "locating",
+        ].includes(s.phase) &&
+        (s.timer.deadline !== null || s.timer.remaining !== null),
+      "В этой фазе нет активного таймера",
+    );
+    const seconds = c.value;
+    requireRule(
+      typeof seconds === "number" &&
+        Number.isSafeInteger(seconds) &&
+        seconds >= 0 &&
+        Number.isSafeInteger(now + seconds * 1000),
+      "Введите целое неотрицательное число секунд",
+    );
+    if (s.paused || s.phase === "loadingPanorama")
+      s.timer = { deadline: null, remaining: seconds * 1000 };
+    else arm(s, seconds, now);
+    return "Таймер установлен: " + seconds + " сек.";
+  }
+  if (c.type === "rename") {
+    requireRule(who.role === "player", "Игрок может изменить только своё имя");
+    const player = s.players.find((p) => p.id === who.playerId);
+    requireRule(player, "Игрок не найден");
+    player.name = availableName(s, c.value, player.id);
+    return "Имя игрока изменено";
+  }
   if (c.type === "restartGame") {
     requireRule(who.role === "host", "Только ведущий запускает новую партию");
     requireRule(s.round > 0 && s.phase !== "lobby", "Сначала начните игру");
@@ -302,28 +363,44 @@ export function applyCommand(
     Object.assign(s, fresh);
     return "Начата новая партия тем же составом. Очки, ответы и ставки обнулены";
   }
-  if (c.type === "restartRound" || c.type === "nextRound") {
+  if (["restartRound", "nextRound", "previousRound"].includes(c.type)) {
     requireRule(who.role === "host", "Только ведущий управляет раундами");
     requireRule(s.round > 0 && s.phase !== "lobby", "Сначала начните игру");
-    if (c.type === "restartRound") {
+    if (c.type === "restartRound" || c.type === "previousRound") {
+      const previous = c.type === "previousRound";
       requireRule(
-        c.value === "НАЧАТЬ РАУНД ЗАНОВО",
-        "Подтвердите перезапуск раунда",
+        c.value === (previous ? "ПРЕДЫДУЩИЙ РАУНД" : "НАЧАТЬ РАУНД ЗАНОВО"),
+        "Подтвердите возврат к началу раунда",
       );
-      const checkpoint = s.roundCheckpoint;
+      const checkpoint = previous
+        ? previousRoundCheckpoint(s)
+        : s.roundCheckpoint;
       requireRule(
-        checkpoint && checkpoint.round === s.round,
-        "В старом сохранении нет начала этого раунда. Перезапуск станет доступен со следующего раунда.",
+        checkpoint && (previous || checkpoint.round === s.round),
+        "В сохранении нет начала этого раунда. Возврат недоступен.",
       );
-      for (const p of s.players) p.score -= checkpoint.awards[p.id] ?? 0;
+      for (const p of s.players) {
+        p.score -= checkpoint.awards[p.id] ?? 0;
+        if (previous) p.score -= s.roundCheckpoint!.awards[p.id] ?? 0;
+      }
+      if (previous) {
+        s.roundIndex--;
+        s.round = checkpoint.round;
+        for (const round of s.config.roundOrder.slice(s.roundIndex))
+          delete s.roundCheckpoints[round];
+      }
+      s.roundCheckpoint = structuredClone(checkpoint);
       s.used = [...checkpoint.used];
       s.boardIds = [...checkpoint.boardIds];
       s.order = [...checkpoint.order];
       s.roster = [...checkpoint.roster];
       s.turn = checkpoint.turn;
-      checkpoint.awards = {};
+      s.roundCheckpoint.awards = {};
       s.completed = 0;
+      s.total = s.round === 6 ? 1 : s.boardIds.length;
       clearQuestion(s);
+      s.questionPublicId = null;
+      s.scoreBefore = {};
       s.phase = "intro";
       s.finalAttemptId = null;
       s.bets = {};
@@ -337,7 +414,9 @@ export function applyCommand(
       s.resumeVideo = false;
       s.roundEpoch = randomUUID();
       syncLegacyRoundBank(s, bank);
-      return "Раунд начат заново: ответы и начисления раунда отменены, предыдущие очки и ручные поправки сохранены";
+      return previous
+        ? "Возврат к началу предыдущего раунда: начисления обоих раундов отменены, более ранние очки и ручные поправки сохранены"
+        : "Раунд начат заново: ответы и начисления раунда отменены, предыдущие очки и ручные поправки сохранены";
     }
     requireRule(
       c.value === "СЛЕДУЮЩИЙ РАУНД",
@@ -352,6 +431,9 @@ export function applyCommand(
         for (const [id, delta] of Object.entries(s.deltas)) {
           const p = s.players.find((p) => p.id === id);
           if (p) p.score -= delta;
+          if (s.roundCheckpoint)
+            s.roundCheckpoint.awards[id] =
+              (s.roundCheckpoint.awards[id] ?? 0) - delta;
         }
       s.turn++;
     }
@@ -480,14 +562,14 @@ export function applyCommand(
     }
     return s.paused ? "Игра приостановлена" : "Игра продолжена";
   }
-  requireRule(!s.paused, "Игра на паузе");
+  requireRule(!s.paused || canAnswerDuringPause(s, who, c), "Игра на паузе");
   if (c.type === "choose") {
     requireRule(s.phase === "choosing", "Сейчас нельзя выбирать вопрос");
     requireRule(
       who.role === "host" || who.playerId === activeId(s),
       "Сейчас выбирает другой игрок",
     );
-    const byId = s.round === 1 && bank.some((q) => q.id === c.value);
+    const byId = s.round <= 3 && bank.some((q) => q.id === c.value);
     const q = bank.find(
       (q) =>
         q.active &&
@@ -643,22 +725,6 @@ export function applyCommand(
     requireRule(idx >= 0, "Игрок вне очереди");
     s.turn = idx;
     return "Ведущий назначил активного игрока";
-  }
-  if (c.type === "timer") {
-    requireRule(s.timer.deadline !== null, "В этой фазе нет таймера");
-    const sec = z
-      .number()
-      .int()
-      .min(5)
-      .max(s.round === 6 ? s.config.final.seconds : 600)
-      .parse(c.value);
-    if (s.round === 6 && s.phase === "locating")
-      requireRule(
-        sec * 1000 <= s.timer.deadline - now + 100,
-        "Финальный таймер можно только сократить",
-      );
-    arm(s, sec, now);
-    return "Таймер установлен: " + sec + " сек.";
   }
   if (c.type === "remove") {
     requireRule(s.phase === "lobby", "Удаление доступно только в лобби");

@@ -289,11 +289,9 @@ test("полная партия: 5 раундов, весь банк, ставк
       }
       await h
         .locator(
-          round === 1
+          round <= 3 || round === 5
             ? ".v2-board button:not(:disabled)"
-            : round <= 3
-              ? ".category-list button:not(:disabled)"
-              : ".question-board button:not(:disabled)",
+            : ".question-board button:not(:disabled)",
         )
         .first()
         .click();

@@ -1,6 +1,8 @@
 import { migrateLocalPanoramas } from "./local-panorama-migration.js";
 import { migrateDisplayNames } from "./display-names.js";
 import { migrateRoundOneContent } from "./round-one-content.js";
+import { migrateImportedFragments } from "./imported-fragments.js";
+import { seedContentLibrary } from "./content-library.js";
 import { validateFinalFile } from "./panorama-files.js";
 import { publicError } from "../shared/errors.js";
 import { randomUUID } from "node:crypto";
@@ -50,11 +52,13 @@ export async function createApp(
     process.env.SESSION_SECRET && process.env.SESSION_SECRET.length >= 32,
     "SESSION_SECRET должен содержать не менее 32 символов",
   );
+  if (process.env.NODE_ENV !== "test") await seedContentLibrary(db);
   await seed(db);
   await migrateLocalPanoramas(db);
   await seedV2(db);
   await migrateDisplayNames(db);
   await migrateRoundOneContent(db);
+  await migrateImportedFragments(db);
   const store = new Store(db);
   await store.init(!options.legacyForTests);
   const mediaRows = await db.media.findMany();
@@ -195,7 +199,10 @@ export async function createApp(
           )
         : false;
       const who = await identity(store, signed, role);
-      if (!who) throw new Error("Сессия истекла. Войдите снова.");
+      if (!who)
+        throw Object.assign(new Error("Сессия истекла. Войдите снова."), {
+          data: { code: "SESSION_ENDED" },
+        });
       const screen = socket.handshake.auth.surface === "obs";
       requireRule(
         !screen || who.role === "host",
@@ -317,6 +324,7 @@ export async function createApp(
             [
               "undo",
               "reset",
+              "endGame",
               "start",
               "choose",
               "order",
@@ -324,6 +332,7 @@ export async function createApp(
               "restartRound",
               "restartGame",
               "nextRound",
+              "previousRound",
             ].includes(e.command.type)
           )
             requireRule(
@@ -344,6 +353,7 @@ export async function createApp(
               "startLocation",
               "endWaiting",
               "passPoint",
+              "timer",
             ].includes(e.command.type)
           )
             requireRule(
@@ -353,7 +363,7 @@ export async function createApp(
             );
           if (
             store.state.round === 6 &&
-            !["score", "joinOpen", "reset"].includes(e.command.type)
+            !["score", "joinOpen", "reset", "rename"].includes(e.command.type)
           )
             requireRule(
               (e.finalAttemptId ?? null) === store.state.finalAttemptId,
@@ -372,7 +382,7 @@ export async function createApp(
               e.decisionToken === store.state.decisionToken,
               "Это судейское решение уже изменилось",
             );
-          if (!["reset", "ready"].includes(e.command.type))
+          if (!["reset", "ready", "rename"].includes(e.command.type))
             requireRule(
               (e.roundEpoch ?? null) === store.state.roundEpoch,
               "Раунд был перезапущен. Проверьте экран.",
@@ -399,6 +409,13 @@ export async function createApp(
               for (const p of current.players)
                 if (!prev.players.some((old) => old.id === p.id))
                   prev.players.push(p);
+              for (const p of prev.players) {
+                const currentPlayer = current.players.find(
+                  (player) => player.id === p.id,
+                )!;
+                p.name = currentPlayer.name;
+                p.color = currentPlayer.color;
+              }
               prev.joinOpen = current.joinOpen;
               prev.finalSelection = current.finalSelection;
               prev.finalRandom = current.finalRandom;
@@ -414,92 +431,128 @@ export async function createApp(
               }
               return accepted("Восстановлена предыдущая фаза");
             }, false);
-          } else if (e.command.type === "reset") {
+          } else if (
+            e.command.type === "reset" ||
+            e.command.type === "endGame"
+          ) {
+            const ending = e.command.type === "endGame";
             requireRule(
-              who.role === "host" && e.command.value === "СБРОС",
-              "Нужно подтверждение сброса",
+              who.role === "host" &&
+                e.command.value === (ending ? "ЗАВЕРШИТЬ ИГРУ" : "СБРОС"),
+              ending
+                ? "Только ведущий может подтвердить завершение игры"
+                : "Нужно подтверждение сброса",
             );
-            await store.mutate(() => {
-              const old = store.state;
-              store.state = initialState(
-                old.config.rulesVersion === 1 && !options.legacyForTests
-                  ? upgradeConfig(old.config)
-                  : old.config,
-              );
-              store.state.revision = old.revision;
-              store.state.acceptedCommands = { ...old.acceptedCommands };
-              store.state.selectedPackageId = old.selectedPackageId;
-              store.state.players = old.players.map((p) => ({
-                ...p,
-                score: 0,
-                ready: false,
-              }));
-              store.history = [];
-              return accepted("Партия полностью сброшена");
-            }, false);
-          } else
-            await store.mutate(async () => {
-              if (e.command.type === "restartGame") {
-                requireRule(
-                  who.role === "host" &&
-                    e.command.value === "НАЧАТЬ ИГРУ ЗАНОВО",
-                  "Нужно подтверждение ведущего для новой партии",
+            await store.mutate(
+              () => {
+                const old = store.state;
+                store.state = initialState(
+                  !ending &&
+                    old.config.rulesVersion === 1 &&
+                    !options.legacyForTests
+                    ? upgradeConfig(old.config)
+                    : old.config,
                 );
-                if (store.state.config.rulesVersion === 2) {
-                  requireRule(
-                    store.state.packageSnapshot,
-                    "Снимок пакета отсутствует",
-                  );
-                  const issues = await validatePackageFiles(
-                    store,
-                    store.state.packageSnapshot,
-                  );
-                  requireRule(!issues.length, issues.join("; "));
-                }
-              }
-              if (
-                e.command.type === "start" &&
-                store.state.config.rulesVersion === 2
-              ) {
-                requireRule(
-                  who.role === "host",
-                  "Только ведущий запускает игру",
-                );
-                const pack = store.packages.find(
-                  (pack) => pack.id === store.state.selectedPackageId,
-                );
-                requireRule(pack, "Выберите игровой пакет");
-                const issues = await validatePackageFiles(store, pack);
-                requireRule(!issues.length, issues.join("; "));
-                store.state.packageSnapshot = structuredClone(pack);
-              }
-              const message = applyCommand(
-                store.state,
-                who,
-                e.command,
-                store.bank,
-                Date.now(),
-                receivedAt,
-              );
-              if (
-                e.command.type === "selectFinal" ||
-                (e.command.type === "begin" &&
-                  store.state.question?.round === 6)
-              ) {
-                requireRule(store.state.finalSelection, "Панорама не выбрана");
-                await validateFinalFile(db, store.state.finalSelection);
-              }
-              if (
-                [
-                  "cancelFinal",
-                  "restartRound",
-                  "restartGame",
-                  "nextRound",
-                ].includes(e.command.type)
-              )
+                store.state.revision = old.revision;
+                store.state.acceptedCommands = { ...old.acceptedCommands };
+                store.state.selectedPackageId = old.selectedPackageId;
+                store.state.players = ending
+                  ? []
+                  : old.players.map((p) => ({
+                      ...p,
+                      score: 0,
+                      ready: false,
+                    }));
+                if (ending) store.state.roundEpoch = randomUUID();
                 store.history = [];
-              return accepted(message);
-            }, !["cancelFinal", "restartRound", "restartGame", "nextRound"].includes(e.command.type));
+                return accepted(
+                  ending
+                    ? "Игра завершена. Игроки отключены, вход в новую игру открыт"
+                    : "Партия полностью сброшена",
+                );
+              },
+              false,
+              true,
+            );
+          } else
+            await store.mutate(
+              async () => {
+                if (e.command.type === "restartGame") {
+                  requireRule(
+                    who.role === "host" &&
+                      e.command.value === "НАЧАТЬ ИГРУ ЗАНОВО",
+                    "Нужно подтверждение ведущего для новой партии",
+                  );
+                  if (store.state.config.rulesVersion === 2) {
+                    requireRule(
+                      store.state.packageSnapshot,
+                      "Снимок пакета отсутствует",
+                    );
+                    const pack =
+                      store.packages.find(
+                        (pack) => pack.id === store.state.packageSnapshot!.id,
+                      ) ?? store.state.packageSnapshot;
+                    const issues = await validatePackageFiles(store, pack);
+                    requireRule(!issues.length, issues.join("; "));
+                    store.state.packageSnapshot = structuredClone(pack);
+                  }
+                }
+                if (
+                  e.command.type === "start" &&
+                  store.state.config.rulesVersion === 2
+                ) {
+                  requireRule(
+                    who.role === "host",
+                    "Только ведущий запускает игру",
+                  );
+                  const pack = store.packages.find(
+                    (pack) => pack.id === store.state.selectedPackageId,
+                  );
+                  requireRule(pack, "Выберите игровой пакет");
+                  const issues = await validatePackageFiles(store, pack);
+                  requireRule(!issues.length, issues.join("; "));
+                  store.state.packageSnapshot = structuredClone(pack);
+                }
+                const message = applyCommand(
+                  store.state,
+                  who,
+                  e.command,
+                  store.bank,
+                  Date.now(),
+                  receivedAt,
+                );
+                if (
+                  e.command.type === "selectFinal" ||
+                  (e.command.type === "begin" &&
+                    store.state.question?.round === 6)
+                ) {
+                  requireRule(
+                    store.state.finalSelection,
+                    "Панорама не выбрана",
+                  );
+                  await validateFinalFile(db, store.state.finalSelection);
+                }
+                if (
+                  [
+                    "cancelFinal",
+                    "restartRound",
+                    "restartGame",
+                    "nextRound",
+                    "previousRound",
+                  ].includes(e.command.type)
+                )
+                  store.history = [];
+                return accepted(message);
+              },
+              ![
+                "cancelFinal",
+                "restartRound",
+                "restartGame",
+                "nextRound",
+                "previousRound",
+              ].includes(e.command.type),
+              ["start", "restartGame"].includes(e.command.type),
+            );
           const result = { ok: true };
           processed.set(key, result);
           if (processed.size > 2000)

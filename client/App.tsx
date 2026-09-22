@@ -53,11 +53,18 @@ export function App() {
     socket.on("state", state);
     socket.on("connect", on);
     socket.on("disconnect", off);
-    socket.on("session-ended", () => {
+    const endSession = () => {
       setSession(null);
       setView(null);
+      setConnected(false);
+      setError("");
+      socket.disconnect();
+    };
+    socket.on("session-ended", endSession);
+    socket.on("connect_error", (e: Error & { data?: { code?: string } }) => {
+      if (e.data?.code === "SESSION_ENDED") endSession();
+      else setError(publicError(e));
     });
-    socket.on("connect_error", (e) => setError(publicError(e)));
     return () => {
       socket.off("session-ended");
       socket.off("connect_error");
@@ -88,7 +95,7 @@ export function App() {
     }
   }
   const act = (type: string, value?: unknown) => {
-    void command({ type, value }).catch((e) => setError(publicError(e)));
+    return command({ type, value }).catch((e) => setError(publicError(e)));
   };
   if (loading)
     return (

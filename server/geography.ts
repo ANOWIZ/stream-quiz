@@ -2,6 +2,8 @@ import { readFileSync, existsSync } from "node:fs";
 import { containsPoint, type CountryFeature } from "../shared/geography.js";
 import type { GeoPoint } from "../shared/content.js";
 import { geoDistance } from "d3-geo";
+// The renderer and answer validation share the same host-defined game map.
+// Reload the server after regenerating public/world.json.
 export const countries = (
   JSON.parse(
     readFileSync(

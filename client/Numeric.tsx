@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import type { GameView } from "../shared/types.js";
+import { NumericResults } from "./NumericResults.js";
 export function Numeric({
   v,
   act,
@@ -140,16 +141,31 @@ export function Numeric({
       </div>
       {revealed && (
         <div className="correct-scale">
+          {q.acceptedMin !== undefined && q.acceptedMax !== undefined && (
+            <div
+              className="accepted-range"
+              style={{
+                left: percent(q.acceptedMin) + "%",
+                width: percent(q.acceptedMax) - percent(q.acceptedMin) + "%",
+              }}
+            />
+          )}
           <div
             className="correct-marker"
             style={{ left: percent(Number(q.answer)) + "%" }}
           >
             <span>
-              ✓ {q.answer} {q.unit}
+              Ответ: {q.answer} {q.unit}
             </span>
           </div>
         </div>
       )}
+      {revealed && q.acceptedMin !== undefined && (
+        <p className="accepted-range-caption">
+          Засчитывается: {q.acceptedMin}–{q.acceptedMax} {q.unit}
+        </p>
+      )}
+      {revealed && <NumericResults v={v} />}
       {!revealed && (
         <div className="answer-area">
           {isActive && v.phase === "point" ? (

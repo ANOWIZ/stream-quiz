@@ -46,7 +46,7 @@ const base = {
   id: z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/),
   category: text.max(100),
   text: text,
-  explanation: text,
+  explanation: z.string().trim().max(6000).default(""),
   source: z.string().trim().max(6000).default(""),
   active: z.boolean().default(true),
   position: z.number().int().min(0).default(0),
@@ -65,6 +65,8 @@ export const questionSchema = z
       max: z.number().finite(),
       unit: z.string().max(60),
       answer: z.number().finite(),
+      acceptedMin: z.number().finite().optional(),
+      acceptedMax: z.number().finite().optional(),
     }),
     z.object({
       ...base,
@@ -121,6 +123,25 @@ export const questionSchema = z
     }),
   ])
   .superRefine((q, ctx) => {
+    if (
+      q.round === 1 &&
+      (q.acceptedMin !== undefined || q.acceptedMax !== undefined)
+    ) {
+      if (
+        q.acceptedMin === undefined ||
+        q.acceptedMax === undefined ||
+        q.acceptedMin > q.answer ||
+        q.acceptedMax < q.answer ||
+        q.acceptedMin < q.min ||
+        q.acceptedMax > q.max ||
+        Math.ceil(q.acceptedMin) > Math.floor(q.acceptedMax)
+      )
+        ctx.addIssue({
+          code: "custom",
+          message:
+            "Укажите обе границы зачёта: диапазон должен быть внутри шкалы и включать правильный ответ",
+        });
+    }
     if (
       q.round === 1 &&
       (q.max <= q.min ||

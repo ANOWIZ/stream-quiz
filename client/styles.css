@@ -1173,6 +1173,12 @@ kbd {
   justify-content: space-between;
   gap: 12px;
 }
+.map-pause-status {
+  margin: 0 0 10px;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.4;
+}
 .world-map {
   margin: 25px 0;
   position: relative;

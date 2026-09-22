@@ -50,6 +50,7 @@ export function buzzerCommand(
   );
   const correct = z.boolean().parse(c.value);
   const winner = s.buzzWinner;
+  s.answers[winner] = { choice: correct ? "correct" : "wrong", locked: true };
   addPoints(s, winner, correct ? q.value : -q.value);
   if (correct) {
     reveal(s);

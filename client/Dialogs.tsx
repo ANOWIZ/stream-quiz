@@ -17,6 +17,8 @@ type Options = {
   confirmLabel?: string;
   inputLabel?: string;
   requiredValue?: string;
+  inputType?: "text" | "number";
+  min?: number;
 };
 type Request = Options & {
   id: number;
@@ -165,6 +167,10 @@ function GameDialog({
             {request.inputLabel ?? "Введите значение"}
             <input
               data-dialog-focus
+              type={request.inputType ?? "text"}
+              min={request.min}
+              step={request.inputType === "number" ? 1 : undefined}
+              required={request.inputType === "number"}
               value={value}
               onChange={(event) => setValue(event.target.value)}
               onFocus={(event) => event.target.select()}

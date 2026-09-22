@@ -26,7 +26,12 @@ export async function identity(
     !store.state.players.some((p) => p.id === s.playerId)
   )
     return null;
-  return { id: s.id, role, name: s.name, playerId: s.playerId };
+  return {
+    id: s.id,
+    role,
+    name: store.state.players.find((p) => p.id === s.playerId)?.name ?? s.name,
+    playerId: s.playerId,
+  };
 }
 export async function login(store: Store, req: Request, res: Response) {
   const { role, name, password } = req.body as {

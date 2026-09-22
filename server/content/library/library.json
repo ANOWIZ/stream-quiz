@@ -1,0 +1,3123 @@
+{
+  "version": 1,
+  "config": {
+    "rulesVersion": 2,
+    "comparison": {
+      "points": 1000,
+      "percentTolerance": 5,
+      "relativeTolerance": 0.05
+    },
+    "buzzerPoints": {
+      "fragmentCorrect": 1000,
+      "fragmentWrong": 500,
+      "memoryCorrect": 1000,
+      "memoryWrong": 1000
+    },
+    "maxPlayers": 6,
+    "roundNames": {
+      "1": "Больше-меньше",
+      "2": "До и после",
+      "3": "Кто это сказал?",
+      "4": "Угадай по фрагменту",
+      "5": "Запомни",
+      "6": "География"
+    },
+    "roundOrder": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "questionCounts": {
+      "2": 10,
+      "3": 10,
+      "4": 10,
+      "5": 10,
+      "6": 10
+    },
+    "numeric": {
+      "narrow": 0.1,
+      "wide": 0.2,
+      "thresholds": [
+        0.05,
+        0.1,
+        0.2
+      ],
+      "activePoints": [
+        300,
+        200,
+        100
+      ],
+      "narrowPoints": 200,
+      "widePoints": 100
+    },
+    "choicePoints": {
+      "beforeAfter": 1500,
+      "twoWorlds": 2000
+    },
+    "boardValues": [
+      100,
+      200,
+      300
+    ],
+    "timers": {
+      "point": 45,
+      "ranges": 45,
+      "answer": 35,
+      "buzz": 45,
+      "judge": 30,
+      "bet": 45,
+      "study": [
+        30,
+        30,
+        30
+      ]
+    },
+    "final": {
+      "betLimit": 1,
+      "seconds": 60
+    },
+    "uploads": {
+      "imageMB": 15,
+      "videoMB": 150
+    }
+  },
+  "questions": [
+    {
+      "formatVersion": 2,
+      "id": "user-venice-san-giuseppe",
+      "category": "География",
+      "text": "Где это?",
+      "explanation": "Венеция — мост Сан-Джузеппе. Правильная страна: Италия.",
+      "source": "https://polyhaven.com/a/san_giuseppe_bridge",
+      "active": true,
+      "position": 0,
+      "value": 0,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 6,
+      "location": {
+        "latitude": 45.4305,
+        "longitude": 12.357
+      },
+      "answer": "IT",
+      "place": "Венеция — мост Сан-Джузеппе",
+      "panoramaFileId": "5df0d199-7418-48e1-8fb0-b839a4527556",
+      "title": "Венеция — мост Сан-Джузеппе",
+      "author": "Greg Zaal",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "camera": {
+        "heading": 0,
+        "pitch": 0,
+        "zoom": 1,
+        "minZoom": 0.75,
+        "maxZoom": 4
+      },
+      "addedAt": "2026-09-19T18:50:23.261Z"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r2-01",
+      "category": "История",
+      "text": "Распад СССР",
+      "explanation": "ДО: СССР — 1991, фильм — 1997.",
+      "source": "Документ ведущего «1.docx», раунд 2, вопрос 1. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Dissolution_of_the_Soviet_Union\nhttps://www.paramountpictures.com/movies/titanic",
+      "active": true,
+      "position": 0,
+      "value": 1500,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 2,
+      "anchorText": "Выход фильма «Титаник» Джеймса Кэмерона",
+      "anchorDate": 1997,
+      "targetDate": 1991,
+      "answer": "before"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r3-01",
+      "category": "Рэп / Политика · 1",
+      "text": "«Мы хотим идти вперед, но нам все время кое-что мешает».",
+      "explanation": "Политика. Виктор Черномырдин.",
+      "source": "Документ ведущего «1.docx», раунд 3, вопрос 1. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 0,
+      "value": 2000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 3,
+      "speaker": "Виктор Черномырдин",
+      "work": "Цитата в документе «1.docx»; выступление не указано",
+      "translated": false,
+      "verified": true,
+      "options": [
+        "Рэп",
+        "Политика"
+      ],
+      "answer": "b"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r4-01",
+      "category": "Актёры и актрисы",
+      "text": "Какой актёр изображён?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 4, вопрос 1. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 0,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "media": {
+        "kind": "image",
+        "fileId": "5a333b4a-ef2b-41c1-abd1-9972dfe3ea2f",
+        "alt": "Фрагмент изображения",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 4,
+      "fullImageFileId": "63c8b927-c09b-4477-8b44-3ec1ee057cb8",
+      "suppliedFragment": true,
+      "answer": "Джим Керри"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r5-01",
+      "category": "Запомни 1",
+      "text": "Сколько кошек было на картинке?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 5, вопрос 1. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 0,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [
+        "6",
+        "Шесть"
+      ],
+      "media": {
+        "kind": "image",
+        "fileId": "1f0bd138-86e6-482b-8e3d-084706198ff7",
+        "alt": "Изображение для запоминания",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 5,
+      "answer": "6",
+      "studySeconds": 30
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r1-01",
+      "category": "Фильмы",
+      "text": "Сколько минут длится фильм «Титаник» Джеймса Кэмерона?",
+      "explanation": "194 минуты. Справочный хронометраж — 194 минуты.",
+      "source": "Документ ведущего «1.docx», раунд 1, вопрос 1. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://de.wikipedia.org/wiki/Titanic_(1997)",
+      "active": true,
+      "position": 0,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 1,
+      "numericKind": "number",
+      "min": 0,
+      "max": 300,
+      "unit": "минут",
+      "answer": 194,
+      "acceptedMin": 190,
+      "acceptedMax": 197
+    },
+    {
+      "formatVersion": 2,
+      "id": "user-rio-christ-redeemer",
+      "category": "География",
+      "text": "Где это?",
+      "explanation": "Рио-де-Жанейро — вид с вершины статуи Христа. Правильная страна: Бразилия.",
+      "source": "Файл предоставлен ведущим: 51537360171_dbbe127d6e_b.jpg. Место по описанию ведущего; координаты памятника: https://www.wikidata.org/wiki/Q79961",
+      "active": true,
+      "position": 1,
+      "value": 0,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 6,
+      "location": {
+        "latitude": -22.95191561111111,
+        "longitude": -43.210464111111115
+      },
+      "answer": "BR",
+      "place": "Рио-де-Жанейро — вид с вершины статуи Христа",
+      "panoramaFileId": "bd5ab38b-09de-4ac3-a049-19ed3198b5c4",
+      "title": "Рио-де-Жанейро — вид с вершины статуи Христа",
+      "author": "Не указан в предоставленном файле",
+      "license": "Не указана в предоставленных данных",
+      "camera": {
+        "heading": 0,
+        "pitch": 0,
+        "zoom": 1,
+        "minZoom": 0.75,
+        "maxZoom": 4
+      },
+      "addedAt": "2026-09-19T18:50:23.307Z"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r2-02",
+      "category": "Технологии",
+      "text": "Основание YouTube",
+      "explanation": "ДО: YouTube — 2005, iPhone — 2007.",
+      "source": "Документ ведущего «1.docx», раунд 2, вопрос 2. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/YouTube\nhttps://www.apple.com/newsroom/2007/01/09Apple-Reinvents-the-Phone-with-iPhone/",
+      "active": true,
+      "position": 1,
+      "value": 1500,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 2,
+      "anchorText": "Презентация первого iPhone",
+      "anchorDate": 2007,
+      "targetDate": 2005,
+      "answer": "before"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r3-02",
+      "category": "Литература / Рэп",
+      "text": "«Я сразу смазал карту будня, плеснувши краску из стакана».",
+      "explanation": "Литература. Владимир Маяковский, «А вы могли бы?». Текст произведения.",
+      "source": "Документ ведущего «1.docx», раунд 3, вопрос 2. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://ru.wikisource.org/wiki/%D0%90_%D0%B2%D1%8B_%D0%BC%D0%BE%D0%B3%D0%BB%D0%B8_%D0%B1%D1%8B%3F_(%D0%9C%D0%B0%D1%8F%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9)",
+      "active": true,
+      "position": 1,
+      "value": 2000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 3,
+      "speaker": "Владимир Маяковский",
+      "work": "«А вы могли бы?»",
+      "translated": false,
+      "verified": true,
+      "options": [
+        "Литература",
+        "Рэп"
+      ],
+      "answer": "a"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r4-02",
+      "category": "Кино",
+      "text": "Из какой кинофраншизы этот кадр?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 4, вопрос 2. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 1,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "media": {
+        "kind": "image",
+        "fileId": "290ade1c-7fa7-443e-bf78-bcfcaebe1f1b",
+        "alt": "Фрагмент изображения",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 4,
+      "fullImageFileId": "9b23b408-1137-4e14-b510-4a41da9eb5b1",
+      "suppliedFragment": true,
+      "answer": "«Матрица»"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r5-02",
+      "category": "Запомни 2",
+      "text": "Какого цвета был зонт?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 5, вопрос 2. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 1,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [
+        "Жёлтый"
+      ],
+      "media": {
+        "kind": "image",
+        "fileId": "41c8ab87-fdcb-4ab1-a605-2e1cc87b94ad",
+        "alt": "Изображение для запоминания",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 5,
+      "answer": "Жёлтого",
+      "studySeconds": 30
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r1-02",
+      "category": "География",
+      "text": "Какой процент американцев 18–24 лет 2018 года ответили, что всегда считали Землю плоской?",
+      "explanation": "4%. Опрос YouGov; результаты и разбивка по возрасту приведены в Forbes.",
+      "source": "Документ ведущего «1.docx», раунд 1, вопрос 2. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://www.forbes.com/sites/trevornace/2018/04/04/only-two-thirds-of-american-millennials-believe-the-earth-is-round/",
+      "active": true,
+      "position": 1,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 1,
+      "numericKind": "percent",
+      "min": 0,
+      "max": 100,
+      "unit": "%",
+      "answer": 4,
+      "acceptedMin": 3,
+      "acceptedMax": 5
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r2-03",
+      "category": "Кино",
+      "text": "Выход «Гарри Поттера и философского камня» в прокат США",
+      "explanation": "ПОСЛЕ: «Шрек» — 18 мая 2001, «Гарри Поттер» — 16 ноября 2001.",
+      "source": "Документ ведущего «1.docx», раунд 2, вопрос 3. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Shrek\nhttps://en.wikipedia.org/wiki/Harry_Potter_and_the_Philosopher%27s_Stone_(film)",
+      "active": true,
+      "position": 2,
+      "value": 1500,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 2,
+      "anchorText": "Выход первого «Шрека» в широкий прокат США",
+      "anchorDate": "2001-05-18",
+      "targetDate": "2001-11-16",
+      "answer": "after"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r3-03",
+      "category": "Политик / Литература",
+      "text": "«Если жена тебе изменила, то радуйся, что она изменила тебе, а не отечеству».",
+      "explanation": "Литература. Антон Чехов, «Жизнь прекрасна!». Текст произведения.",
+      "source": "Документ ведущего «1.docx», раунд 3, вопрос 3. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://ru.wikisource.org/wiki/%D0%96%D0%B8%D0%B7%D0%BD%D1%8C_%D0%BF%D1%80%D0%B5%D0%BA%D1%80%D0%B0%D1%81%D0%BD%D0%B0!_(%D0%A7%D0%B5%D1%85%D0%BE%D0%B2)",
+      "active": true,
+      "position": 2,
+      "value": 2000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 3,
+      "speaker": "Антон Чехов",
+      "work": "«Жизнь прекрасна!»",
+      "translated": false,
+      "verified": true,
+      "options": [
+        "Политик",
+        "Литература"
+      ],
+      "answer": "b"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r4-03",
+      "category": "Мультфильмы",
+      "text": "Какой персонаж изображён?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 4, вопрос 3. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 2,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "media": {
+        "kind": "image",
+        "fileId": "c83f24ae-a8a3-48be-8086-2d2a14bfa87a",
+        "alt": "Фрагмент изображения",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 4,
+      "fullImageFileId": "0f713f28-a010-4c6b-94e4-5287bd05e1cb",
+      "suppliedFragment": true,
+      "answer": "Шрек"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r5-03",
+      "category": "Запомни 3",
+      "text": "Какое время показывали часы?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 5, вопрос 3. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 2,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [
+        "14:35"
+      ],
+      "media": {
+        "kind": "image",
+        "fileId": "0e9ac855-5476-472a-b001-5762e521d174",
+        "alt": "Изображение для запоминания",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 5,
+      "answer": "14:35",
+      "studySeconds": 30
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r1-03",
+      "category": "Космос",
+      "text": "Сколько минут длился первый космический полёт Юрия Гагарина?",
+      "explanation": "108 минут. «Восток-1».",
+      "source": "Документ ведущего «1.docx», раунд 1, вопрос 3. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Vostok_1",
+      "active": true,
+      "position": 2,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 1,
+      "numericKind": "number",
+      "min": 0,
+      "max": 500,
+      "unit": "минут",
+      "answer": 108,
+      "acceptedMin": 105,
+      "acceptedMax": 110
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r2-04",
+      "category": "Бренды",
+      "text": "Основание Nintendo",
+      "explanation": "ПОСЛЕ: Coca-Cola — 1886, Nintendo — 1889.",
+      "source": "Документ ведущего «1.docx», раунд 2, вопрос 4. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://www.coca-colacompany.com/about-us/history/the-birth-of-a-refreshing-idea\nhttps://en.wikipedia.org/wiki/Nintendo",
+      "active": true,
+      "position": 3,
+      "value": 1500,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 2,
+      "anchorText": "Начало продаж напитка Coca-Cola",
+      "anchorDate": 1886,
+      "targetDate": 1889,
+      "answer": "after"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r3-04",
+      "category": "Спорт / Политика",
+      "text": "«То, что мы не оправдали ваши ожидания — это не наши проблемы. Это ваши проблемы».",
+      "explanation": "Спорт. Андрей Аршавин после Евро-2012. Цитата и ссылка на публикацию.",
+      "source": "Документ ведущего «1.docx», раунд 3, вопрос 4. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://ru.wikiquote.org/wiki/%D0%90%D0%BD%D0%B4%D1%80%D0%B5%D0%B9_%D0%A1%D0%B5%D1%80%D0%B3%D0%B5%D0%B5%D0%B2%D0%B8%D1%87_%D0%90%D1%80%D1%88%D0%B0%D0%B2%D0%B8%D0%BD",
+      "active": true,
+      "position": 3,
+      "value": 2000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 3,
+      "speaker": "Андрей Аршавин",
+      "work": "После Евро-2012",
+      "translated": false,
+      "verified": true,
+      "options": [
+        "Спорт",
+        "Политика"
+      ],
+      "answer": "a"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r4-04",
+      "category": "Бренды",
+      "text": "Какой это бренд?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 4, вопрос 4. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 3,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [
+        "Pringles",
+        "«Принглс»"
+      ],
+      "media": {
+        "kind": "image",
+        "fileId": "9f70b0e6-0b20-49d8-9693-fffaead0fa78",
+        "alt": "Фрагмент изображения",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 4,
+      "fullImageFileId": "610eaaeb-c874-43e3-a40d-1064a20d451a",
+      "suppliedFragment": true,
+      "answer": "Pringles / «Принглс»"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r5-04",
+      "category": "Запомни 4",
+      "text": "Что стояло непосредственно справа от пакета молока?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 5, вопрос 4. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 3,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "media": {
+        "kind": "image",
+        "fileId": "fe6180cb-1c99-4723-8e44-28e580923aa2",
+        "alt": "Изображение для запоминания",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 5,
+      "answer": "Банка мёда / мёд",
+      "studySeconds": 30
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r1-04",
+      "category": "Вода",
+      "text": "Какова максимальная глубина озера Байкал в метрах?",
+      "explanation": "1642 метра. Данные о Байкале.",
+      "source": "Документ ведущего «1.docx», раунд 1, вопрос 4. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Lake_Baikal",
+      "active": true,
+      "position": 3,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 1,
+      "numericKind": "number",
+      "min": 0,
+      "max": 2000,
+      "unit": "метров",
+      "answer": 1642,
+      "acceptedMin": 1630,
+      "acceptedMax": 1650
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r2-05",
+      "category": "Музыка",
+      "text": "Публичное заявление Пола Маккартни о прекращении работы с The Beatles",
+      "explanation": "ПОСЛЕ: посадка — июль 1969, заявление — апрель 1970.",
+      "source": "Документ ведущего «1.docx», раунд 2, вопрос 5. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Apollo_11\nhttps://en.wikipedia.org/wiki/Break-up_of_the_Beatles",
+      "active": true,
+      "position": 4,
+      "value": 1500,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 2,
+      "anchorText": "Посадка «Аполлона-11» на Луну",
+      "anchorDate": "1969-07",
+      "targetDate": "1970-04",
+      "answer": "after"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r3-05",
+      "category": "Боксёр / Философ",
+      "text": "«У всех есть планы, пока они не получат первый удар».",
+      "explanation": "Боксёр. Майк Тайсон. Источник и атрибуция.",
+      "source": "Документ ведущего «1.docx», раунд 3, вопрос 5. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikiquote.org/wiki/Mike_Tyson",
+      "active": true,
+      "position": 4,
+      "value": 2000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 3,
+      "speaker": "Майк Тайсон",
+      "work": "Цитата в документе «1.docx»; интервью не указано",
+      "translated": false,
+      "verified": true,
+      "options": [
+        "Боксёр",
+        "Философ"
+      ],
+      "answer": "a"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r4-05",
+      "category": "Живопись",
+      "text": "Как называется картина?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 4, вопрос 5. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 4,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "media": {
+        "kind": "image",
+        "fileId": "803839a5-abd4-4779-81b2-f1aa57037772",
+        "alt": "Фрагмент изображения",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 4,
+      "fullImageFileId": "393ed453-ad09-4b66-a94c-20b0b4813e84",
+      "suppliedFragment": true,
+      "answer": "«Девушка с жемчужной серёжкой»"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r5-05",
+      "category": "Запомни 5",
+      "text": "Что было нарисовано на картине?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 5, вопрос 5. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 4,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "media": {
+        "kind": "image",
+        "fileId": "f63101ee-9d9a-4107-9ccf-be1c1d8d620f",
+        "alt": "Изображение для запоминания",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 5,
+      "answer": "Маяк/обрыв",
+      "studySeconds": 30
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r1-05",
+      "category": "Россия",
+      "text": "Сколько башен у Московского Кремля?",
+      "explanation": "20. Московский Кремль.",
+      "source": "Документ ведущего «1.docx», раунд 1, вопрос 5. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Moscow_Kremlin",
+      "active": true,
+      "position": 4,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 1,
+      "numericKind": "number",
+      "min": 0,
+      "max": 50,
+      "unit": "башен",
+      "answer": 20,
+      "acceptedMin": 20,
+      "acceptedMax": 20
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r2-06",
+      "category": "Транспорт",
+      "text": "Открытие Московского метро",
+      "explanation": "ПОСЛЕ: лайнер — 1912, метро — 1935.",
+      "source": "Документ ведущего «1.docx», раунд 2, вопрос 6. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Sinking_of_the_Titanic\nhttps://en.wikipedia.org/wiki/Moscow_Metro",
+      "active": true,
+      "position": 5,
+      "value": 1500,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 2,
+      "anchorText": "Гибель лайнера «Титаник»",
+      "anchorDate": 1912,
+      "targetDate": 1935,
+      "answer": "after"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r3-06",
+      "category": "Бизнес-книга / Сказка",
+      "text": "«Здесь нужно бежать изо всех сил, чтобы оставаться на месте».",
+      "explanation": "Сказка. Королева в «Алисе в Зазеркалье» Льюиса Кэрролла. Перевод с английского. Оригинальный текст.",
+      "source": "Документ ведущего «1.docx», раунд 3, вопрос 6. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 5,
+      "value": 2000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 3,
+      "speaker": "Королева",
+      "work": "«Алиса в Зазеркалье», Льюис Кэрролл",
+      "translated": true,
+      "translationNote": "Русская формулировка из документа «1.docx». Переводчик в документе не указан.",
+      "verified": true,
+      "options": [
+        "Бизнес-книга",
+        "Сказка"
+      ],
+      "answer": "b"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r4-06",
+      "category": "Предметы",
+      "text": "Что это за предмет?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 4, вопрос 6. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 5,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "media": {
+        "kind": "image",
+        "fileId": "b8a58a72-ebb2-4006-83c6-2f7f1f593cc1",
+        "alt": "Фрагмент изображения",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 4,
+      "fullImageFileId": "b2d1053f-8b37-4167-a9cd-f170e16363dd",
+      "suppliedFragment": true,
+      "answer": "Тёрка"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r5-06",
+      "category": "Запомни 6",
+      "text": "Сколько свечей было на торте?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 5, вопрос 6. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 5,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "media": {
+        "kind": "image",
+        "fileId": "59bb5726-de5e-4a85-b958-f7bc611ffb94",
+        "alt": "Изображение для запоминания",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 5,
+      "answer": "7",
+      "studySeconds": 30
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r1-06",
+      "category": "Анатомия",
+      "text": "Сколько костей обычно насчитывают в скелете взрослого человека?",
+      "explanation": "206. Строение человеческого скелета.",
+      "source": "Документ ведущего «1.docx», раунд 1, вопрос 6. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Human_skeleton",
+      "active": true,
+      "position": 5,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 1,
+      "numericKind": "number",
+      "min": 0,
+      "max": 300,
+      "unit": "костей",
+      "answer": 206,
+      "acceptedMin": 203,
+      "acceptedMax": 208
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r2-07",
+      "category": "Кино и история",
+      "text": "Последняя казнь на гильотине во Франции",
+      "explanation": "ПОСЛЕ. Фильм — 25 мая 1977, казнь — 10 сентября 1977.",
+      "source": "Документ ведущего «1.docx», раунд 2, вопрос 7. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Star_Wars_(film)\nhttps://en.wikipedia.org/wiki/Hamida_Djandoubi",
+      "active": true,
+      "position": 6,
+      "value": 1500,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 2,
+      "anchorText": "Выход первых «Звёздных войн» в прокат США",
+      "anchorDate": "1977-05-25",
+      "targetDate": "1977-09-10",
+      "answer": "after"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r3-07",
+      "category": "Писатель / Депутат",
+      "text": "«Там хорошо, где нас нет: в прошлом нас уже нет, и оно кажется прекрасным.»",
+      "explanation": "Писатель — Антон Чехов, записные книжки.",
+      "source": "Документ ведущего «1.docx», раунд 3, вопрос 7. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://ru.wikiquote.org/wiki/%D0%90%D0%BD%D1%82%D0%BE%D0%BD_%D0%9F%D0%B0%D0%B2%D0%BB%D0%BE%D0%B2%D0%B8%D1%87_%D0%A7%D0%B5%D1%85%D0%BE%D0%B2",
+      "active": true,
+      "position": 6,
+      "value": 2000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 3,
+      "speaker": "Антон Чехов",
+      "work": "Записные книжки",
+      "translated": false,
+      "verified": true,
+      "options": [
+        "Писатель",
+        "Депутат"
+      ],
+      "answer": "a"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r4-07",
+      "category": "Скульптуры",
+      "text": "Как называется эта статуя?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 4, вопрос 7. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 6,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "media": {
+        "kind": "image",
+        "fileId": "888c0007-8f35-4b01-b979-3fcf8033f5a4",
+        "alt": "Фрагмент изображения",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 4,
+      "fullImageFileId": "743d21ee-6336-4abe-89af-29c65fb8028d",
+      "suppliedFragment": true,
+      "answer": "Статуя Свободы"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r5-07",
+      "category": "Запомни 7",
+      "text": "Какого/каких цветов был зонт?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 5, вопрос 7. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 6,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "media": {
+        "kind": "image",
+        "fileId": "f3d41e67-1291-4466-be52-838bcc2b1d96",
+        "alt": "Изображение для запоминания",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 5,
+      "answer": "Красный и белый. Нужно назвать оба",
+      "studySeconds": 30
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r1-07",
+      "category": "Музыкальные инструменты",
+      "text": "Сколько всего клавиш у стандартного современного фортепиано — белых и чёрных вместе?",
+      "explanation": "88. Yamaha.",
+      "source": "Документ ведущего «1.docx», раунд 1, вопрос 7. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://www.yamaha.com/en/musical_instrument_guide/piano/trivia/trivia007.html",
+      "active": true,
+      "position": 6,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 1,
+      "numericKind": "number",
+      "min": 0,
+      "max": 150,
+      "unit": "клавиш",
+      "answer": 88,
+      "acceptedMin": 85,
+      "acceptedMax": 90
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r2-08",
+      "category": "Сериалы и интернет",
+      "text": "Основание компании Google",
+      "explanation": "ПОСЛЕ. Сериал — 1994, компания — 1998.",
+      "source": "Документ ведущего «1.docx», раунд 2, вопрос 8. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Friends\nhttps://en.wikipedia.org/wiki/Google",
+      "active": true,
+      "position": 7,
+      "value": 1500,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 2,
+      "anchorText": "Премьера сериала «Друзья»",
+      "anchorDate": 1994,
+      "targetDate": 1998,
+      "answer": "after"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r3-08",
+      "category": "Рок-песня / Стихотворение",
+      "text": "«Мы ждём перемен!»",
+      "explanation": "Рок-песня. Виктор Цой, группа «Кино», «Хочу перемен!». Сведения о песне.",
+      "source": "Документ ведущего «1.docx», раунд 3, вопрос 8. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://ru.wikipedia.org/wiki/%D0%A5%D0%BE%D1%87%D1%83_%D0%BF%D0%B5%D1%80%D0%B5%D0%BC%D0%B5%D0%BD!",
+      "active": true,
+      "position": 7,
+      "value": 2000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 3,
+      "speaker": "Виктор Цой, группа «Кино»",
+      "work": "«Хочу перемен!»",
+      "translated": false,
+      "verified": true,
+      "options": [
+        "Рок-песня",
+        "Стихотворение"
+      ],
+      "answer": "a"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r4-08",
+      "category": "Животные",
+      "text": "Что это за животное?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 4, вопрос 8. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 7,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "media": {
+        "kind": "image",
+        "fileId": "273002f6-19be-4458-a279-d43cb2a9f744",
+        "alt": "Фрагмент изображения",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 4,
+      "fullImageFileId": "fc5112b3-b5d7-4a05-b55c-3d14687b3536",
+      "suppliedFragment": true,
+      "answer": "Жираф"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r5-08",
+      "category": "Запомни 8",
+      "text": "Какого цвета была рукоятка отвёртки?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 5, вопрос 8. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 7,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "media": {
+        "kind": "image",
+        "fileId": "0b052db7-ea20-461b-a742-85821a58edaa",
+        "alt": "Изображение для запоминания",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 5,
+      "answer": "Красного",
+      "studySeconds": 30
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r1-08",
+      "category": "Планета Земля",
+      "text": "Примерно какой процент всей воды Земли находится в океане?",
+      "explanation": "97%. Оценка NOAA.",
+      "source": "Документ ведущего «1.docx», раунд 1, вопрос 8. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://oceanservice.noaa.gov/facts/oceanwater.html",
+      "active": true,
+      "position": 7,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 1,
+      "numericKind": "percent",
+      "min": 0,
+      "max": 100,
+      "unit": "%",
+      "answer": 97
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r2-09",
+      "category": "Мультфильмы и компьютеры",
+      "text": "Выход оригинального мультфильма «Король Лев»",
+      "explanation": "ДО. Мультфильм — 1994, Windows — 1995.",
+      "source": "Документ ведущего «1.docx», раунд 2, вопрос 9. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/The_Lion_King\nhttps://en.wikipedia.org/wiki/Windows_95",
+      "active": true,
+      "position": 8,
+      "value": 1500,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 2,
+      "anchorText": "Выход Windows 95",
+      "anchorDate": 1995,
+      "targetDate": 1994,
+      "answer": "before"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r3-09",
+      "category": "Финансовый блог / Мультфильм",
+      "text": "«Чтобы продать что-нибудь ненужное, нужно сначала купить что-нибудь ненужное…»",
+      "explanation": "Мультфильм. Дядя Фёдор, «Трое из Простоквашино».",
+      "source": "Документ ведущего «1.docx», раунд 3, вопрос 9. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://ru.wikiquote.org/wiki/%D0%A2%D1%80%D0%BE%D0%B5_%D0%B8%D0%B7_%D0%9F%D1%80%D0%BE%D1%81%D1%82%D0%BE%D0%BA%D0%B2%D0%B0%D1%88%D0%B8%D0%BD%D0%BE",
+      "active": true,
+      "position": 8,
+      "value": 2000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 3,
+      "speaker": "Дядя Фёдор",
+      "work": "«Трое из Простоквашино»",
+      "translated": false,
+      "verified": true,
+      "options": [
+        "Финансовый блог",
+        "Мультфильм"
+      ],
+      "answer": "b"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r5-09",
+      "category": "Запомни 9",
+      "text": "Сколько жёлтых рыбок было в аквариуме?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 5, вопрос 9. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 8,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "media": {
+        "kind": "image",
+        "fileId": "0d50b482-119a-4483-b4e7-9c3cd9b74e5b",
+        "alt": "Изображение для запоминания",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 5,
+      "answer": "2",
+      "studySeconds": 30
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r1-09",
+      "category": "Животные",
+      "text": "Сколько постоянных зубов в норме у взрослой домашней кошки?",
+      "explanation": "30 зубов. 26 молочных зубов сменяются 30 постоянными.",
+      "source": "Документ ведущего «1.docx», раунд 1, вопрос 9. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://www.cats.org.uk/help-and-advice/health/dental-care",
+      "active": true,
+      "position": 8,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 1,
+      "numericKind": "number",
+      "min": 0,
+      "max": 60,
+      "unit": "зубов",
+      "answer": 30,
+      "acceptedMin": 28,
+      "acceptedMax": 32
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r2-10",
+      "category": "Наука и мир",
+      "text": "Отмена крепостного права в России",
+      "explanation": "ДО. таблица — 1869. Отмена — 1861",
+      "source": "Документ ведущего «1.docx», раунд 2, вопрос 10. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Periodic_table\nhttps://en.wikipedia.org/wiki/Emancipation_reform_of_1861",
+      "active": true,
+      "position": 9,
+      "value": 1500,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 2,
+      "anchorText": "Публикация периодической таблицы Менделеева",
+      "anchorDate": 1869,
+      "targetDate": 1861,
+      "answer": "before"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r3-10",
+      "category": "Рэп / Политика · 2",
+      "text": "«Я ловлю в далеком отголоске, что случится на моем веку»",
+      "explanation": "Политика. Брежнев",
+      "source": "Документ ведущего «1.docx», раунд 3, вопрос 10. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 9,
+      "value": 2000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 3,
+      "speaker": "Брежнев",
+      "work": "Цитата в документе «1.docx»; выступление не указано",
+      "translated": false,
+      "verified": true,
+      "options": [
+        "Рэп",
+        "Политика"
+      ],
+      "answer": "b"
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r5-10",
+      "category": "Запомни 10",
+      "text": "Какой предмет лежал между очками и паспортом?",
+      "explanation": "",
+      "source": "Документ ведущего «1.docx», раунд 5, вопрос 10. Формулировка, ответ и атрибуция перенесены из документа.",
+      "active": true,
+      "position": 9,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "media": {
+        "kind": "image",
+        "fileId": "f03a0425-d879-4411-bee2-c12ee9dcd170",
+        "alt": "Изображение для запоминания",
+        "start": 0,
+        "muted": true,
+        "autoplay": false
+      },
+      "round": 5,
+      "answer": "Фотоаппарат/камера",
+      "studySeconds": 30
+    },
+    {
+      "formatVersion": 2,
+      "id": "docx1-20260920-r1-10",
+      "category": "Видеоигры",
+      "text": "Сколько видов покемонов было в первом поколении, включая Мью?",
+      "explanation": "151. Список покемонов первого поколения: от Бульбазавра № 1 до Мью № 151.",
+      "source": "Документ ведущего «1.docx», раунд 1, вопрос 10. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/List_of_generation_I_Pok%C3%A9mon",
+      "active": true,
+      "position": 9,
+      "value": 1000,
+      "difficulty": 1,
+      "alternatives": [],
+      "round": 1,
+      "numericKind": "number",
+      "min": 0,
+      "max": 300,
+      "unit": "видов",
+      "answer": 151,
+      "acceptedMin": 145,
+      "acceptedMax": 155
+    }
+  ],
+  "packages": [
+    {
+      "id": "docx1-20260920",
+      "name": "Вопросы из 1.docx",
+      "description": "48 вопросов из документа ведущего и 2 учебных фрагмента («Часы», «Карандаш»). Изображения из папки «картинки для квиза». Финальную панораму ведущий выбирает вручную.",
+      "revision": 22,
+      "updatedAt": "2026-09-21T15:20:45.278Z",
+      "questions": [
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r1-01",
+          "category": "Фильмы",
+          "text": "Сколько минут длится фильм «Титаник» Джеймса Кэмерона?",
+          "explanation": "194 минуты. Справочный хронометраж — 194 минуты.",
+          "source": "Документ ведущего «1.docx», раунд 1, вопрос 1. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://de.wikipedia.org/wiki/Titanic_(1997)",
+          "active": true,
+          "position": 0,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 1,
+          "numericKind": "number",
+          "min": 0,
+          "max": 300,
+          "unit": "минут",
+          "answer": 194,
+          "acceptedMin": 190,
+          "acceptedMax": 197
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r1-02",
+          "category": "География",
+          "text": "Какой процент американцев 18–24 лет 2018 года ответили, что всегда считали Землю плоской?",
+          "explanation": "4%. Опрос YouGov; результаты и разбивка по возрасту приведены в Forbes.",
+          "source": "Документ ведущего «1.docx», раунд 1, вопрос 2. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://www.forbes.com/sites/trevornace/2018/04/04/only-two-thirds-of-american-millennials-believe-the-earth-is-round/",
+          "active": true,
+          "position": 1,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 1,
+          "numericKind": "percent",
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "answer": 4,
+          "acceptedMin": 3,
+          "acceptedMax": 5
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r1-03",
+          "category": "Космос",
+          "text": "Сколько минут длился первый космический полёт Юрия Гагарина?",
+          "explanation": "108 минут. «Восток-1».",
+          "source": "Документ ведущего «1.docx», раунд 1, вопрос 3. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Vostok_1",
+          "active": true,
+          "position": 2,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 1,
+          "numericKind": "number",
+          "min": 0,
+          "max": 500,
+          "unit": "минут",
+          "answer": 108,
+          "acceptedMin": 105,
+          "acceptedMax": 110
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r1-04",
+          "category": "Вода",
+          "text": "Какова максимальная глубина озера Байкал в метрах?",
+          "explanation": "1642 метра. Данные о Байкале.",
+          "source": "Документ ведущего «1.docx», раунд 1, вопрос 4. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Lake_Baikal",
+          "active": true,
+          "position": 3,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 1,
+          "numericKind": "number",
+          "min": 0,
+          "max": 2000,
+          "unit": "метров",
+          "answer": 1642,
+          "acceptedMin": 1630,
+          "acceptedMax": 1650
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r1-05",
+          "category": "Россия",
+          "text": "Сколько башен у Московского Кремля?",
+          "explanation": "20. Московский Кремль.",
+          "source": "Документ ведущего «1.docx», раунд 1, вопрос 5. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Moscow_Kremlin",
+          "active": true,
+          "position": 4,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 1,
+          "numericKind": "number",
+          "min": 0,
+          "max": 50,
+          "unit": "башен",
+          "answer": 20,
+          "acceptedMin": 20,
+          "acceptedMax": 20
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r1-06",
+          "category": "Анатомия",
+          "text": "Сколько костей обычно насчитывают в скелете взрослого человека?",
+          "explanation": "206. Строение человеческого скелета.",
+          "source": "Документ ведущего «1.docx», раунд 1, вопрос 6. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Human_skeleton",
+          "active": true,
+          "position": 5,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 1,
+          "numericKind": "number",
+          "min": 0,
+          "max": 300,
+          "unit": "костей",
+          "answer": 206,
+          "acceptedMin": 203,
+          "acceptedMax": 208
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r1-07",
+          "category": "Музыкальные инструменты",
+          "text": "Сколько всего клавиш у стандартного современного фортепиано — белых и чёрных вместе?",
+          "explanation": "88. Yamaha.",
+          "source": "Документ ведущего «1.docx», раунд 1, вопрос 7. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://www.yamaha.com/en/musical_instrument_guide/piano/trivia/trivia007.html",
+          "active": true,
+          "position": 6,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 1,
+          "numericKind": "number",
+          "min": 0,
+          "max": 150,
+          "unit": "клавиш",
+          "answer": 88,
+          "acceptedMin": 85,
+          "acceptedMax": 90
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r1-08",
+          "category": "Планета Земля",
+          "text": "Примерно какой процент всей воды Земли находится в океане?",
+          "explanation": "97%. Оценка NOAA.",
+          "source": "Документ ведущего «1.docx», раунд 1, вопрос 8. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://oceanservice.noaa.gov/facts/oceanwater.html",
+          "active": true,
+          "position": 7,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 1,
+          "numericKind": "percent",
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "answer": 97
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r1-09",
+          "category": "Животные",
+          "text": "Сколько постоянных зубов в норме у взрослой домашней кошки?",
+          "explanation": "30 зубов. 26 молочных зубов сменяются 30 постоянными.",
+          "source": "Документ ведущего «1.docx», раунд 1, вопрос 9. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://www.cats.org.uk/help-and-advice/health/dental-care",
+          "active": true,
+          "position": 8,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 1,
+          "numericKind": "number",
+          "min": 0,
+          "max": 60,
+          "unit": "зубов",
+          "answer": 30,
+          "acceptedMin": 28,
+          "acceptedMax": 32
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r1-10",
+          "category": "Видеоигры",
+          "text": "Сколько видов покемонов было в первом поколении, включая Мью?",
+          "explanation": "151. Список покемонов первого поколения: от Бульбазавра № 1 до Мью № 151.",
+          "source": "Документ ведущего «1.docx», раунд 1, вопрос 10. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/List_of_generation_I_Pok%C3%A9mon",
+          "active": true,
+          "position": 9,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 1,
+          "numericKind": "number",
+          "min": 0,
+          "max": 300,
+          "unit": "видов",
+          "answer": 151,
+          "acceptedMin": 145,
+          "acceptedMax": 155
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r2-01",
+          "category": "История",
+          "text": "Распад СССР",
+          "explanation": "ДО: СССР — 1991, фильм — 1997.",
+          "source": "Документ ведущего «1.docx», раунд 2, вопрос 1. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Dissolution_of_the_Soviet_Union\nhttps://www.paramountpictures.com/movies/titanic",
+          "active": true,
+          "position": 0,
+          "value": 1500,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 2,
+          "anchorText": "Выход фильма «Титаник» Джеймса Кэмерона",
+          "anchorDate": 1997,
+          "targetDate": 1991,
+          "answer": "before"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r2-02",
+          "category": "Технологии",
+          "text": "Основание YouTube",
+          "explanation": "ДО: YouTube — 2005, iPhone — 2007.",
+          "source": "Документ ведущего «1.docx», раунд 2, вопрос 2. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/YouTube\nhttps://www.apple.com/newsroom/2007/01/09Apple-Reinvents-the-Phone-with-iPhone/",
+          "active": true,
+          "position": 1,
+          "value": 1500,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 2,
+          "anchorText": "Презентация первого iPhone",
+          "anchorDate": 2007,
+          "targetDate": 2005,
+          "answer": "before"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r2-03",
+          "category": "Кино",
+          "text": "Выход «Гарри Поттера и философского камня» в прокат США",
+          "explanation": "ПОСЛЕ: «Шрек» — 18 мая 2001, «Гарри Поттер» — 16 ноября 2001.",
+          "source": "Документ ведущего «1.docx», раунд 2, вопрос 3. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Shrek\nhttps://en.wikipedia.org/wiki/Harry_Potter_and_the_Philosopher%27s_Stone_(film)",
+          "active": true,
+          "position": 2,
+          "value": 1500,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 2,
+          "anchorText": "Выход первого «Шрека» в широкий прокат США",
+          "anchorDate": "2001-05-18",
+          "targetDate": "2001-11-16",
+          "answer": "after"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r2-04",
+          "category": "Бренды",
+          "text": "Основание Nintendo",
+          "explanation": "ПОСЛЕ: Coca-Cola — 1886, Nintendo — 1889.",
+          "source": "Документ ведущего «1.docx», раунд 2, вопрос 4. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://www.coca-colacompany.com/about-us/history/the-birth-of-a-refreshing-idea\nhttps://en.wikipedia.org/wiki/Nintendo",
+          "active": true,
+          "position": 3,
+          "value": 1500,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 2,
+          "anchorText": "Начало продаж напитка Coca-Cola",
+          "anchorDate": 1886,
+          "targetDate": 1889,
+          "answer": "after"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r2-05",
+          "category": "Музыка",
+          "text": "Публичное заявление Пола Маккартни о прекращении работы с The Beatles",
+          "explanation": "ПОСЛЕ: посадка — июль 1969, заявление — апрель 1970.",
+          "source": "Документ ведущего «1.docx», раунд 2, вопрос 5. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Apollo_11\nhttps://en.wikipedia.org/wiki/Break-up_of_the_Beatles",
+          "active": true,
+          "position": 4,
+          "value": 1500,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 2,
+          "anchorText": "Посадка «Аполлона-11» на Луну",
+          "anchorDate": "1969-07",
+          "targetDate": "1970-04",
+          "answer": "after"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r2-06",
+          "category": "Транспорт",
+          "text": "Открытие Московского метро",
+          "explanation": "ПОСЛЕ: лайнер — 1912, метро — 1935.",
+          "source": "Документ ведущего «1.docx», раунд 2, вопрос 6. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Sinking_of_the_Titanic\nhttps://en.wikipedia.org/wiki/Moscow_Metro",
+          "active": true,
+          "position": 5,
+          "value": 1500,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 2,
+          "anchorText": "Гибель лайнера «Титаник»",
+          "anchorDate": 1912,
+          "targetDate": 1935,
+          "answer": "after"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r2-07",
+          "category": "Кино и история",
+          "text": "Последняя казнь на гильотине во Франции",
+          "explanation": "ПОСЛЕ. Фильм — 25 мая 1977, казнь — 10 сентября 1977.",
+          "source": "Документ ведущего «1.docx», раунд 2, вопрос 7. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Star_Wars_(film)\nhttps://en.wikipedia.org/wiki/Hamida_Djandoubi",
+          "active": true,
+          "position": 6,
+          "value": 1500,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 2,
+          "anchorText": "Выход первых «Звёздных войн» в прокат США",
+          "anchorDate": "1977-05-25",
+          "targetDate": "1977-09-10",
+          "answer": "after"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r2-08",
+          "category": "Сериалы и интернет",
+          "text": "Основание компании Google",
+          "explanation": "ПОСЛЕ. Сериал — 1994, компания — 1998.",
+          "source": "Документ ведущего «1.docx», раунд 2, вопрос 8. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Friends\nhttps://en.wikipedia.org/wiki/Google",
+          "active": true,
+          "position": 7,
+          "value": 1500,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 2,
+          "anchorText": "Премьера сериала «Друзья»",
+          "anchorDate": 1994,
+          "targetDate": 1998,
+          "answer": "after"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r2-09",
+          "category": "Мультфильмы и компьютеры",
+          "text": "Выход оригинального мультфильма «Король Лев»",
+          "explanation": "ДО. Мультфильм — 1994, Windows — 1995.",
+          "source": "Документ ведущего «1.docx», раунд 2, вопрос 9. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/The_Lion_King\nhttps://en.wikipedia.org/wiki/Windows_95",
+          "active": true,
+          "position": 8,
+          "value": 1500,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 2,
+          "anchorText": "Выход Windows 95",
+          "anchorDate": 1995,
+          "targetDate": 1994,
+          "answer": "before"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r2-10",
+          "category": "Наука и мир",
+          "text": "Отмена крепостного права в России",
+          "explanation": "ДО. таблица — 1869. Отмена — 1861",
+          "source": "Документ ведущего «1.docx», раунд 2, вопрос 10. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikipedia.org/wiki/Periodic_table\nhttps://en.wikipedia.org/wiki/Emancipation_reform_of_1861",
+          "active": true,
+          "position": 9,
+          "value": 1500,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 2,
+          "anchorText": "Публикация периодической таблицы Менделеева",
+          "anchorDate": 1869,
+          "targetDate": 1861,
+          "answer": "before"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r3-01",
+          "category": "Рэп / Политика · 1",
+          "text": "«Мы хотим идти вперед, но нам все время кое-что мешает».",
+          "explanation": "Политика. Виктор Черномырдин.",
+          "source": "Документ ведущего «1.docx», раунд 3, вопрос 1. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 0,
+          "value": 2000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 3,
+          "speaker": "Виктор Черномырдин",
+          "work": "Цитата в документе «1.docx»; выступление не указано",
+          "translated": false,
+          "verified": true,
+          "options": [
+            "Рэп",
+            "Политика"
+          ],
+          "answer": "b"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r3-02",
+          "category": "Литература / Рэп",
+          "text": "«Я сразу смазал карту будня, плеснувши краску из стакана».",
+          "explanation": "Литература. Владимир Маяковский, «А вы могли бы?». Текст произведения.",
+          "source": "Документ ведущего «1.docx», раунд 3, вопрос 2. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://ru.wikisource.org/wiki/%D0%90_%D0%B2%D1%8B_%D0%BC%D0%BE%D0%B3%D0%BB%D0%B8_%D0%B1%D1%8B%3F_(%D0%9C%D0%B0%D1%8F%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B8%D0%B9)",
+          "active": true,
+          "position": 1,
+          "value": 2000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 3,
+          "speaker": "Владимир Маяковский",
+          "work": "«А вы могли бы?»",
+          "translated": false,
+          "verified": true,
+          "options": [
+            "Литература",
+            "Рэп"
+          ],
+          "answer": "a"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r3-03",
+          "category": "Политик / Литература",
+          "text": "«Если жена тебе изменила, то радуйся, что она изменила тебе, а не отечеству».",
+          "explanation": "Литература. Антон Чехов, «Жизнь прекрасна!». Текст произведения.",
+          "source": "Документ ведущего «1.docx», раунд 3, вопрос 3. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://ru.wikisource.org/wiki/%D0%96%D0%B8%D0%B7%D0%BD%D1%8C_%D0%BF%D1%80%D0%B5%D0%BA%D1%80%D0%B0%D1%81%D0%BD%D0%B0!_(%D0%A7%D0%B5%D1%85%D0%BE%D0%B2)",
+          "active": true,
+          "position": 2,
+          "value": 2000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 3,
+          "speaker": "Антон Чехов",
+          "work": "«Жизнь прекрасна!»",
+          "translated": false,
+          "verified": true,
+          "options": [
+            "Политик",
+            "Литература"
+          ],
+          "answer": "b"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r3-04",
+          "category": "Спорт / Политика",
+          "text": "«То, что мы не оправдали ваши ожидания — это не наши проблемы. Это ваши проблемы».",
+          "explanation": "Спорт. Андрей Аршавин после Евро-2012. Цитата и ссылка на публикацию.",
+          "source": "Документ ведущего «1.docx», раунд 3, вопрос 4. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://ru.wikiquote.org/wiki/%D0%90%D0%BD%D0%B4%D1%80%D0%B5%D0%B9_%D0%A1%D0%B5%D1%80%D0%B3%D0%B5%D0%B5%D0%B2%D0%B8%D1%87_%D0%90%D1%80%D1%88%D0%B0%D0%B2%D0%B8%D0%BD",
+          "active": true,
+          "position": 3,
+          "value": 2000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 3,
+          "speaker": "Андрей Аршавин",
+          "work": "После Евро-2012",
+          "translated": false,
+          "verified": true,
+          "options": [
+            "Спорт",
+            "Политика"
+          ],
+          "answer": "a"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r3-05",
+          "category": "Боксёр / Философ",
+          "text": "«У всех есть планы, пока они не получат первый удар».",
+          "explanation": "Боксёр. Майк Тайсон. Источник и атрибуция.",
+          "source": "Документ ведущего «1.docx», раунд 3, вопрос 5. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://en.wikiquote.org/wiki/Mike_Tyson",
+          "active": true,
+          "position": 4,
+          "value": 2000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 3,
+          "speaker": "Майк Тайсон",
+          "work": "Цитата в документе «1.docx»; интервью не указано",
+          "translated": false,
+          "verified": true,
+          "options": [
+            "Боксёр",
+            "Философ"
+          ],
+          "answer": "a"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r3-06",
+          "category": "Бизнес-книга / Сказка",
+          "text": "«Здесь нужно бежать изо всех сил, чтобы оставаться на месте».",
+          "explanation": "Сказка. Королева в «Алисе в Зазеркалье» Льюиса Кэрролла. Перевод с английского. Оригинальный текст.",
+          "source": "Документ ведущего «1.docx», раунд 3, вопрос 6. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 5,
+          "value": 2000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 3,
+          "speaker": "Королева",
+          "work": "«Алиса в Зазеркалье», Льюис Кэрролл",
+          "translated": true,
+          "translationNote": "Русская формулировка из документа «1.docx». Переводчик в документе не указан.",
+          "verified": true,
+          "options": [
+            "Бизнес-книга",
+            "Сказка"
+          ],
+          "answer": "b"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r3-07",
+          "category": "Писатель / Депутат",
+          "text": "«Там хорошо, где нас нет: в прошлом нас уже нет, и оно кажется прекрасным.»",
+          "explanation": "Писатель — Антон Чехов, записные книжки.",
+          "source": "Документ ведущего «1.docx», раунд 3, вопрос 7. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://ru.wikiquote.org/wiki/%D0%90%D0%BD%D1%82%D0%BE%D0%BD_%D0%9F%D0%B0%D0%B2%D0%BB%D0%BE%D0%B2%D0%B8%D1%87_%D0%A7%D0%B5%D1%85%D0%BE%D0%B2",
+          "active": true,
+          "position": 6,
+          "value": 2000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 3,
+          "speaker": "Антон Чехов",
+          "work": "Записные книжки",
+          "translated": false,
+          "verified": true,
+          "options": [
+            "Писатель",
+            "Депутат"
+          ],
+          "answer": "a"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r3-08",
+          "category": "Рок-песня / Стихотворение",
+          "text": "«Мы ждём перемен!»",
+          "explanation": "Рок-песня. Виктор Цой, группа «Кино», «Хочу перемен!». Сведения о песне.",
+          "source": "Документ ведущего «1.docx», раунд 3, вопрос 8. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://ru.wikipedia.org/wiki/%D0%A5%D0%BE%D1%87%D1%83_%D0%BF%D0%B5%D1%80%D0%B5%D0%BC%D0%B5%D0%BD!",
+          "active": true,
+          "position": 7,
+          "value": 2000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 3,
+          "speaker": "Виктор Цой, группа «Кино»",
+          "work": "«Хочу перемен!»",
+          "translated": false,
+          "verified": true,
+          "options": [
+            "Рок-песня",
+            "Стихотворение"
+          ],
+          "answer": "a"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r3-09",
+          "category": "Финансовый блог / Мультфильм",
+          "text": "«Чтобы продать что-нибудь ненужное, нужно сначала купить что-нибудь ненужное…»",
+          "explanation": "Мультфильм. Дядя Фёдор, «Трое из Простоквашино».",
+          "source": "Документ ведущего «1.docx», раунд 3, вопрос 9. Формулировка, ответ и атрибуция перенесены из документа.\nhttps://ru.wikiquote.org/wiki/%D0%A2%D1%80%D0%BE%D0%B5_%D0%B8%D0%B7_%D0%9F%D1%80%D0%BE%D1%81%D1%82%D0%BE%D0%BA%D0%B2%D0%B0%D1%88%D0%B8%D0%BD%D0%BE",
+          "active": true,
+          "position": 8,
+          "value": 2000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 3,
+          "speaker": "Дядя Фёдор",
+          "work": "«Трое из Простоквашино»",
+          "translated": false,
+          "verified": true,
+          "options": [
+            "Финансовый блог",
+            "Мультфильм"
+          ],
+          "answer": "b"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r3-10",
+          "category": "Рэп / Политика · 2",
+          "text": "«Я ловлю в далеком отголоске, что случится на моем веку»",
+          "explanation": "Политика. Брежнев",
+          "source": "Документ ведущего «1.docx», раунд 3, вопрос 10. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 9,
+          "value": 2000,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 3,
+          "speaker": "Брежнев",
+          "work": "Цитата в документе «1.docx»; выступление не указано",
+          "translated": false,
+          "verified": true,
+          "options": [
+            "Рэп",
+            "Политика"
+          ],
+          "answer": "b"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r4-01",
+          "category": "Актёры и актрисы",
+          "text": "Какой актёр изображён?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 4, вопрос 1. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 0,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "media": {
+            "kind": "image",
+            "fileId": "5a333b4a-ef2b-41c1-abd1-9972dfe3ea2f",
+            "alt": "Фрагмент изображения",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 4,
+          "fullImageFileId": "63c8b927-c09b-4477-8b44-3ec1ee057cb8",
+          "suppliedFragment": true,
+          "answer": "Джим Керри"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r4-02",
+          "category": "Кино",
+          "text": "Из какой кинофраншизы этот кадр?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 4, вопрос 2. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 1,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "media": {
+            "kind": "image",
+            "fileId": "290ade1c-7fa7-443e-bf78-bcfcaebe1f1b",
+            "alt": "Фрагмент изображения",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 4,
+          "fullImageFileId": "9b23b408-1137-4e14-b510-4a41da9eb5b1",
+          "suppliedFragment": true,
+          "answer": "«Матрица»"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r4-03",
+          "category": "Мультфильмы",
+          "text": "Какой персонаж изображён?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 4, вопрос 3. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 2,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "media": {
+            "kind": "image",
+            "fileId": "c83f24ae-a8a3-48be-8086-2d2a14bfa87a",
+            "alt": "Фрагмент изображения",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 4,
+          "fullImageFileId": "0f713f28-a010-4c6b-94e4-5287bd05e1cb",
+          "suppliedFragment": true,
+          "answer": "Шрек"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r4-04",
+          "category": "Бренды",
+          "text": "Какой это бренд?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 4, вопрос 4. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 3,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [
+            "Pringles",
+            "«Принглс»"
+          ],
+          "media": {
+            "kind": "image",
+            "fileId": "9f70b0e6-0b20-49d8-9693-fffaead0fa78",
+            "alt": "Фрагмент изображения",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 4,
+          "fullImageFileId": "610eaaeb-c874-43e3-a40d-1064a20d451a",
+          "suppliedFragment": true,
+          "answer": "Pringles / «Принглс»"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r4-05",
+          "category": "Живопись",
+          "text": "Как называется картина?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 4, вопрос 5. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 4,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "media": {
+            "kind": "image",
+            "fileId": "803839a5-abd4-4779-81b2-f1aa57037772",
+            "alt": "Фрагмент изображения",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 4,
+          "fullImageFileId": "393ed453-ad09-4b66-a94c-20b0b4813e84",
+          "suppliedFragment": true,
+          "answer": "«Девушка с жемчужной серёжкой»"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r4-06",
+          "category": "Предметы",
+          "text": "Что это за предмет?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 4, вопрос 6. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 5,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "media": {
+            "kind": "image",
+            "fileId": "b8a58a72-ebb2-4006-83c6-2f7f1f593cc1",
+            "alt": "Фрагмент изображения",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 4,
+          "fullImageFileId": "b2d1053f-8b37-4167-a9cd-f170e16363dd",
+          "suppliedFragment": true,
+          "answer": "Тёрка"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r4-07",
+          "category": "Скульптуры",
+          "text": "Как называется эта статуя?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 4, вопрос 7. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 6,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "media": {
+            "kind": "image",
+            "fileId": "888c0007-8f35-4b01-b979-3fcf8033f5a4",
+            "alt": "Фрагмент изображения",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 4,
+          "fullImageFileId": "743d21ee-6336-4abe-89af-29c65fb8028d",
+          "suppliedFragment": true,
+          "answer": "Статуя Свободы"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r4-08",
+          "category": "Животные",
+          "text": "Что это за животное?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 4, вопрос 8. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 7,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "media": {
+            "kind": "image",
+            "fileId": "273002f6-19be-4458-a279-d43cb2a9f744",
+            "alt": "Фрагмент изображения",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 4,
+          "fullImageFileId": "fc5112b3-b5d7-4a05-b55c-3d14687b3536",
+          "suppliedFragment": true,
+          "answer": "Жираф"
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r5-01",
+          "category": "Запомни 1",
+          "text": "Сколько кошек было на картинке?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 5, вопрос 1. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 0,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [
+            "6",
+            "Шесть"
+          ],
+          "media": {
+            "kind": "image",
+            "fileId": "1f0bd138-86e6-482b-8e3d-084706198ff7",
+            "alt": "Изображение для запоминания",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 5,
+          "answer": "6",
+          "studySeconds": 30
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r5-02",
+          "category": "Запомни 2",
+          "text": "Какого цвета был зонт?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 5, вопрос 2. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 1,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [
+            "Жёлтый"
+          ],
+          "media": {
+            "kind": "image",
+            "fileId": "41c8ab87-fdcb-4ab1-a605-2e1cc87b94ad",
+            "alt": "Изображение для запоминания",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 5,
+          "answer": "Жёлтого",
+          "studySeconds": 30
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r5-03",
+          "category": "Запомни 3",
+          "text": "Какое время показывали часы?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 5, вопрос 3. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 2,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [
+            "14:35"
+          ],
+          "media": {
+            "kind": "image",
+            "fileId": "0e9ac855-5476-472a-b001-5762e521d174",
+            "alt": "Изображение для запоминания",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 5,
+          "answer": "14:35",
+          "studySeconds": 30
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r5-04",
+          "category": "Запомни 4",
+          "text": "Что стояло непосредственно справа от пакета молока?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 5, вопрос 4. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 3,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "media": {
+            "kind": "image",
+            "fileId": "fe6180cb-1c99-4723-8e44-28e580923aa2",
+            "alt": "Изображение для запоминания",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 5,
+          "answer": "Банка мёда / мёд",
+          "studySeconds": 30
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r5-05",
+          "category": "Запомни 5",
+          "text": "Что было нарисовано на картине?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 5, вопрос 5. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 4,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "media": {
+            "kind": "image",
+            "fileId": "f63101ee-9d9a-4107-9ccf-be1c1d8d620f",
+            "alt": "Изображение для запоминания",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 5,
+          "answer": "Маяк/обрыв",
+          "studySeconds": 30
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r5-06",
+          "category": "Запомни 6",
+          "text": "Сколько свечей было на торте?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 5, вопрос 6. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 5,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "media": {
+            "kind": "image",
+            "fileId": "59bb5726-de5e-4a85-b958-f7bc611ffb94",
+            "alt": "Изображение для запоминания",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 5,
+          "answer": "7",
+          "studySeconds": 30
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r5-07",
+          "category": "Запомни 7",
+          "text": "Какого/каких цветов был зонт?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 5, вопрос 7. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 6,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "media": {
+            "kind": "image",
+            "fileId": "f3d41e67-1291-4466-be52-838bcc2b1d96",
+            "alt": "Изображение для запоминания",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 5,
+          "answer": "Красный и белый. Нужно назвать оба",
+          "studySeconds": 30
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r5-08",
+          "category": "Запомни 8",
+          "text": "Какого цвета была рукоятка отвёртки?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 5, вопрос 8. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 7,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "media": {
+            "kind": "image",
+            "fileId": "0b052db7-ea20-461b-a742-85821a58edaa",
+            "alt": "Изображение для запоминания",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 5,
+          "answer": "Красного",
+          "studySeconds": 30
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r5-09",
+          "category": "Запомни 9",
+          "text": "Сколько жёлтых рыбок было в аквариуме?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 5, вопрос 9. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 8,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "media": {
+            "kind": "image",
+            "fileId": "0d50b482-119a-4483-b4e7-9c3cd9b74e5b",
+            "alt": "Изображение для запоминания",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 5,
+          "answer": "2",
+          "studySeconds": 30
+        },
+        {
+          "formatVersion": 2,
+          "id": "docx1-20260920-r5-10",
+          "category": "Запомни 10",
+          "text": "Какой предмет лежал между очками и паспортом?",
+          "explanation": "",
+          "source": "Документ ведущего «1.docx», раунд 5, вопрос 10. Формулировка, ответ и атрибуция перенесены из документа.",
+          "active": true,
+          "position": 9,
+          "value": 1000,
+          "difficulty": 1,
+          "alternatives": [],
+          "media": {
+            "kind": "image",
+            "fileId": "f03a0425-d879-4411-bee2-c12ee9dcd170",
+            "alt": "Изображение для запоминания",
+            "start": 0,
+            "muted": true,
+            "autoplay": false
+          },
+          "round": 5,
+          "answer": "Фотоаппарат/камера",
+          "studySeconds": 30
+        },
+        {
+          "formatVersion": 2,
+          "id": "user-venice-san-giuseppe",
+          "category": "География",
+          "text": "Где это?",
+          "explanation": "Венеция — мост Сан-Джузеппе. Правильная страна: Италия.",
+          "source": "https://polyhaven.com/a/san_giuseppe_bridge",
+          "active": true,
+          "position": 0,
+          "value": 0,
+          "difficulty": 1,
+          "alternatives": [],
+          "round": 6,
+          "location": {
+            "latitude": 45.4305,
+            "longitude": 12.357
+          },
+          "answer": "IT",
+          "place": "Венеция — мост Сан-Джузеппе",
+          "panoramaFileId": "5df0d199-7418-48e1-8fb0-b839a4527556",
+          "title": "Венеция — мост Сан-Джузеппе",
+          "author": "Greg Zaal",
+          "license": "CC0 1.0",
+          "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "camera": {
+            "heading": 0,
+            "pitch": 0,
+            "zoom": 1,
+            "minZoom": 0.75,
+            "maxZoom": 4
+          },
+          "addedAt": "2026-09-19T18:50:23.261Z"
+        }
+      ]
+    }
+  ],
+  "categories": [
+    {
+      "id": "category-2-1",
+      "name": "Архив станции",
+      "round": 2
+    },
+    {
+      "id": "category-3-2",
+      "name": "Чётное / нечётное",
+      "round": 3
+    },
+    {
+      "id": "category-2-4",
+      "name": "Экспедиция",
+      "round": 2
+    },
+    {
+      "id": "category-3-5",
+      "name": "Фигура / число",
+      "round": 3
+    },
+    {
+      "id": "category-2-7",
+      "name": "История города",
+      "round": 2
+    },
+    {
+      "id": "category-3-8",
+      "name": "Гласная / согласная",
+      "round": 3
+    },
+    {
+      "id": "category-4-9",
+      "name": "Студия",
+      "round": 4
+    },
+    {
+      "id": "category-4-10",
+      "name": "Формы",
+      "round": 4
+    },
+    {
+      "id": "category-4-11",
+      "name": "Цвета",
+      "round": 4
+    },
+    {
+      "id": "category-4-12",
+      "name": "Предметы",
+      "round": 4
+    },
+    {
+      "id": "category-4-13",
+      "name": "Детали",
+      "round": 4
+    },
+    {
+      "id": "category-5-14",
+      "name": "Студия",
+      "round": 5
+    },
+    {
+      "id": "category-5-15",
+      "name": "Формы",
+      "round": 5
+    },
+    {
+      "id": "category-5-16",
+      "name": "Цвета",
+      "round": 5
+    },
+    {
+      "id": "category-5-17",
+      "name": "Предметы",
+      "round": 5
+    },
+    {
+      "id": "category-5-18",
+      "name": "Детали",
+      "round": 5
+    },
+    {
+      "id": "category-6-19",
+      "name": "Мир",
+      "round": 6
+    },
+    {
+      "id": "484f72f9-9905-48fd-8654-2ea96a2f85ed",
+      "name": "Учебная хроника 1",
+      "round": 2
+    },
+    {
+      "id": "753355d8-2f4f-4b68-ab00-3dcb1d74613b",
+      "name": "Бортовой журнал / Письмо",
+      "round": 3
+    },
+    {
+      "id": "b8ea6ad7-125c-401a-b7f8-0bd806e31c7f",
+      "name": "Предмет 1",
+      "round": 4
+    },
+    {
+      "id": "9dad6ef0-1f11-4729-b955-11328ab2c418",
+      "name": "Учебная память 1",
+      "round": 5
+    },
+    {
+      "id": "80520932-f181-42ec-b635-b5c1c41d1331",
+      "name": "Учебная хроника 2",
+      "round": 2
+    },
+    {
+      "id": "4b696e75-961d-4401-941a-644cee14eec7",
+      "name": "Кино / Видеоигра",
+      "round": 3
+    },
+    {
+      "id": "779c37d9-4304-4170-9e67-0bda6d8ac838",
+      "name": "Предмет 2",
+      "round": 4
+    },
+    {
+      "id": "23c8d432-8cd4-4334-b390-c1ee90d9e4c1",
+      "name": "Учебная память 2",
+      "round": 5
+    },
+    {
+      "id": "b217eace-c48b-4276-8b62-4416a969c9e9",
+      "name": "Учебная хроника 3",
+      "round": 2
+    },
+    {
+      "id": "ab77f9b2-1548-4596-a054-7f8c2b295ff4",
+      "name": "Сказка / Инструкция",
+      "round": 3
+    },
+    {
+      "id": "f51e6509-6313-4c5b-8b9f-53c746caefca",
+      "name": "Предмет 3",
+      "round": 4
+    },
+    {
+      "id": "86d9935e-7441-4780-b6b7-afe5a0b84f6b",
+      "name": "Учебная память 3",
+      "round": 5
+    },
+    {
+      "id": "0b9141cc-b31b-4768-8c7d-7b53f0426f0f",
+      "name": "Учебная хроника 4",
+      "round": 2
+    },
+    {
+      "id": "b9a7ef7a-51f6-4bd5-8aee-0f68572a7278",
+      "name": "Радиоспектакль / Дневник",
+      "round": 3
+    },
+    {
+      "id": "1b58b5cf-8f2f-4c00-80f8-4e82f84f48c5",
+      "name": "Предмет 4",
+      "round": 4
+    },
+    {
+      "id": "dd47c6da-d073-43f5-9bd7-38b7ba03aac3",
+      "name": "Учебная память 4",
+      "round": 5
+    },
+    {
+      "id": "42829b4b-6ee4-40e9-9a15-e855aa0641af",
+      "name": "Учебная хроника 5",
+      "round": 2
+    },
+    {
+      "id": "9e0f0049-1ef1-439d-9b3c-793454c19952",
+      "name": "Бизнес-книга / Басня",
+      "round": 3
+    },
+    {
+      "id": "5bed9f78-5594-45b9-be2e-7370886cf564",
+      "name": "Предмет 5",
+      "round": 4
+    },
+    {
+      "id": "ba86e522-daaf-4515-9d16-a86b973071b4",
+      "name": "Учебная память 5",
+      "round": 5
+    },
+    {
+      "id": "75c09570-860a-49a9-9b40-2ecdbbd80a08",
+      "name": "Учебная хроника 6",
+      "round": 2
+    },
+    {
+      "id": "016a0af7-95a6-40c0-a38a-34601a229c41",
+      "name": "Песня / Стихотворение",
+      "round": 3
+    },
+    {
+      "id": "d39d308d-2240-4f8e-97e6-1fdd7126a69f",
+      "name": "Предмет 6",
+      "round": 4
+    },
+    {
+      "id": "8ee4fb57-e670-4d49-89bb-15f05976739a",
+      "name": "Учебная память 6",
+      "round": 5
+    },
+    {
+      "id": "ca0ce9ad-61a9-4c64-aa25-9029b8a5f00d",
+      "name": "Учебная хроника 7",
+      "round": 2
+    },
+    {
+      "id": "3bda52f8-719f-47c2-ae05-324ed1d739a8",
+      "name": "Пьеса / Путеводитель",
+      "round": 3
+    },
+    {
+      "id": "681a175b-2670-44b4-9e65-6e5619ab313a",
+      "name": "Предмет 7",
+      "round": 4
+    },
+    {
+      "id": "a3a7f0a3-711f-4c10-b55d-bbdbe5a7c8cd",
+      "name": "Учебная память 7",
+      "round": 5
+    },
+    {
+      "id": "09781173-dd44-4e13-9812-8299c86b17d9",
+      "name": "Учебная хроника 8",
+      "round": 2
+    },
+    {
+      "id": "d8689779-e306-4fa8-bdee-f797ace9445f",
+      "name": "Реклама / Репортаж",
+      "round": 3
+    },
+    {
+      "id": "f7bef783-be3d-4a86-9ba8-c36645bc96e5",
+      "name": "Предмет 8",
+      "round": 4
+    },
+    {
+      "id": "9967988c-43bf-453f-96d0-c363a4062eb7",
+      "name": "Учебная память 8",
+      "round": 5
+    },
+    {
+      "id": "e87da0aa-087c-4cce-bf77-42b3a6b7f260",
+      "name": "Учебная хроника 9",
+      "round": 2
+    },
+    {
+      "id": "4085a969-621c-4f14-ae89-48c65e603ee3",
+      "name": "Комикс / Лекция",
+      "round": 3
+    },
+    {
+      "id": "b1b83019-4e6b-4165-9390-1ab6a1840103",
+      "name": "Предмет 9",
+      "round": 4
+    },
+    {
+      "id": "70481581-2b53-4a4c-8c58-596d720a0d74",
+      "name": "Учебная память 9",
+      "round": 5
+    },
+    {
+      "id": "e64efd23-9170-43cc-b202-868e28c3f0a7",
+      "name": "Учебная хроника 10",
+      "round": 2
+    },
+    {
+      "id": "73ec86c9-4c99-48d4-b988-1153ce1c65f3",
+      "name": "Подкаст / Письмо из будущего",
+      "round": 3
+    },
+    {
+      "id": "beb5e5a7-8c34-46f5-b791-7caaef785994",
+      "name": "Предмет 10",
+      "round": 4
+    },
+    {
+      "id": "94ec97c1-5fba-4158-8d36-f42ef1c18ec0",
+      "name": "Учебная память 10",
+      "round": 5
+    },
+    {
+      "id": "user-geography-final",
+      "name": "География",
+      "round": 6
+    },
+    {
+      "id": "65d0532d-e06a-4ee5-8441-9d8665d7a084",
+      "name": "История",
+      "round": 2
+    },
+    {
+      "id": "a8b26330-3ad7-4ffb-b2a5-5f5cc6959b74",
+      "name": "Технологии",
+      "round": 2
+    },
+    {
+      "id": "9c86a892-18f1-4985-aa2f-275cfddce2e5",
+      "name": "Кино",
+      "round": 2
+    },
+    {
+      "id": "7d44b155-4dbe-4a9c-b344-5b3b6b192449",
+      "name": "Бренды",
+      "round": 2
+    },
+    {
+      "id": "83eeb918-0e59-428b-8353-c52c5495f7c1",
+      "name": "Музыка",
+      "round": 2
+    },
+    {
+      "id": "9ed45c0a-0ee6-485b-915d-8eaeb854b07e",
+      "name": "Транспорт",
+      "round": 2
+    },
+    {
+      "id": "12c2e437-e621-4038-8184-fb34e59ef182",
+      "name": "Кино и история",
+      "round": 2
+    },
+    {
+      "id": "a46544e9-6dda-41a7-ad03-0b9a225a7100",
+      "name": "Сериалы и интернет",
+      "round": 2
+    },
+    {
+      "id": "8b9d9583-5764-4b19-a833-ba9f760674f3",
+      "name": "Мультфильмы и компьютеры",
+      "round": 2
+    },
+    {
+      "id": "99126145-b77a-40f1-807a-990d28ffa184",
+      "name": "Наука и мир",
+      "round": 2
+    },
+    {
+      "id": "65450869-dfda-4116-8c0d-32afcc64625d",
+      "name": "Рэп / Политика · 1",
+      "round": 3
+    },
+    {
+      "id": "3f8e32e8-f4ae-4209-b964-12eb15875c44",
+      "name": "Литература / Рэп",
+      "round": 3
+    },
+    {
+      "id": "1728fedc-3f72-46bb-ac0c-62f296d28191",
+      "name": "Политик / Литература",
+      "round": 3
+    },
+    {
+      "id": "ad152b86-1973-4591-a96a-d244f07bd27b",
+      "name": "Спорт / Политика",
+      "round": 3
+    },
+    {
+      "id": "9f3fd82e-bcd1-4632-947e-7e614d2817f4",
+      "name": "Боксёр / Философ",
+      "round": 3
+    },
+    {
+      "id": "4f3cb647-c858-4b97-aa28-1ea78ddc627d",
+      "name": "Бизнес-книга / Сказка",
+      "round": 3
+    },
+    {
+      "id": "58b72a12-d30a-4f2e-bbac-71ca174bc7b9",
+      "name": "Писатель / Депутат",
+      "round": 3
+    },
+    {
+      "id": "9d842bfc-7c07-4a02-b5a0-ba6565857677",
+      "name": "Рок-песня / Стихотворение",
+      "round": 3
+    },
+    {
+      "id": "a0c61961-19e2-4050-831c-d9337b8b4c1e",
+      "name": "Финансовый блог / Мультфильм",
+      "round": 3
+    },
+    {
+      "id": "53e98012-03ce-4003-a3b0-2e7d52783e51",
+      "name": "Рэп / Политика · 2",
+      "round": 3
+    },
+    {
+      "id": "adf05cac-95cd-475c-aa00-9f632be8574e",
+      "name": "Актёры и актрисы",
+      "round": 4
+    },
+    {
+      "id": "5786c7b3-078c-459a-817d-32c5c58cc71b",
+      "name": "Кино",
+      "round": 4
+    },
+    {
+      "id": "571d69a8-c831-417e-ba6a-04538f562ce2",
+      "name": "Мультфильмы",
+      "round": 4
+    },
+    {
+      "id": "bbf1d56a-0539-46fe-bbb2-a9db96dbf8e2",
+      "name": "Бренды",
+      "round": 4
+    },
+    {
+      "id": "810673ed-10ee-4a9e-8b5c-11c6de5f6f76",
+      "name": "Живопись",
+      "round": 4
+    },
+    {
+      "id": "3be4ab6a-373b-48f6-af5e-8bd52ee09e23",
+      "name": "Скульптуры",
+      "round": 4
+    },
+    {
+      "id": "08528c08-ea7a-4212-b43e-e8c644b9daac",
+      "name": "Животные",
+      "round": 4
+    },
+    {
+      "id": "ef95272e-499c-4968-82aa-d9c6406eb40a",
+      "name": "Запомни 1",
+      "round": 5
+    },
+    {
+      "id": "1f256373-ea35-499b-ac6b-34fa6ac25e06",
+      "name": "Запомни 2",
+      "round": 5
+    },
+    {
+      "id": "7cb7135b-4808-4066-a0db-54c52b94ed40",
+      "name": "Запомни 3",
+      "round": 5
+    },
+    {
+      "id": "e9394b3b-96ea-40a9-af37-73ca00e3b42d",
+      "name": "Запомни 4",
+      "round": 5
+    },
+    {
+      "id": "37cc2ae3-102e-48a2-a4ba-6e475949c54f",
+      "name": "Запомни 5",
+      "round": 5
+    },
+    {
+      "id": "994d29ed-484b-4e76-b846-4503d492876e",
+      "name": "Запомни 6",
+      "round": 5
+    },
+    {
+      "id": "7ff3fd7e-7d8e-40ac-bb6b-cd24efda7f0f",
+      "name": "Запомни 7",
+      "round": 5
+    },
+    {
+      "id": "e1a8c02a-ee65-4256-a38c-cd11e3d1b0d7",
+      "name": "Запомни 8",
+      "round": 5
+    },
+    {
+      "id": "6024c064-08b7-4e9c-a890-e92c17cd6a71",
+      "name": "Запомни 9",
+      "round": 5
+    },
+    {
+      "id": "cb4e839a-5dbf-4a12-8bd1-2827947f5366",
+      "name": "Запомни 10",
+      "round": 5
+    },
+    {
+      "id": "97788470-49e9-478b-a9c6-43fea0c14837",
+      "name": "Фильмы",
+      "round": 1
+    },
+    {
+      "id": "e5c0df50-6dd3-4bba-8dd4-ad1e01cb9dff",
+      "name": "География",
+      "round": 1
+    },
+    {
+      "id": "bdad77cc-493b-4880-9f48-ace819907385",
+      "name": "Космос",
+      "round": 1
+    },
+    {
+      "id": "cb2e8ea5-8ce3-450c-ba89-5fbda2b5c421",
+      "name": "Вода",
+      "round": 1
+    },
+    {
+      "id": "df1cffd8-7af1-4244-9e49-9686cfb0da48",
+      "name": "Россия",
+      "round": 1
+    },
+    {
+      "id": "54f47ae2-2337-4094-a1b9-bc0a7e3a0edf",
+      "name": "Анатомия",
+      "round": 1
+    },
+    {
+      "id": "9361623e-6912-4cf4-8f7e-c05bc0dbf5fc",
+      "name": "Музыкальные инструменты",
+      "round": 1
+    },
+    {
+      "id": "f42c448f-f2d4-45ff-889f-4c84b822c238",
+      "name": "Планета Земля",
+      "round": 1
+    },
+    {
+      "id": "5faf555a-b68b-4e95-bf1c-1a39b59cdf6f",
+      "name": "Животные",
+      "round": 1
+    },
+    {
+      "id": "dc35854f-6141-45ce-a46c-cf8b1cf3a3dc",
+      "name": "Видеоигры",
+      "round": 1
+    }
+  ],
+  "media": [
+    {
+      "id": "5df0d199-7418-48e1-8fb0-b839a4527556",
+      "filename": "5df0d199-7418-48e1-8fb0-b839a4527556.jpg",
+      "mime": "image/jpeg",
+      "size": 1425037,
+      "originalName": "Панорама 360°",
+      "sha256": "ff480e4385bf65c0a0cdb03872f8df057a681834a6dfb99c10218b28c6b1e14f"
+    },
+    {
+      "id": "5a333b4a-ef2b-41c1-abd1-9972dfe3ea2f",
+      "filename": "5a333b4a-ef2b-41c1-abd1-9972dfe3ea2f.jpg",
+      "mime": "image/jpeg",
+      "size": 72763,
+      "originalName": "1.docx · Фрагмент 1",
+      "sha256": "6f950172711497ef089250bea6c3e196d8480bcd2e7f0aeb2ca9f95607ab2c80"
+    },
+    {
+      "id": "63c8b927-c09b-4477-8b44-3ec1ee057cb8",
+      "filename": "63c8b927-c09b-4477-8b44-3ec1ee057cb8.webp",
+      "mime": "image/webp",
+      "size": 228068,
+      "originalName": "1.docx · Полное изображение 1",
+      "sha256": "43d5b7d2e96ff4770d5783cd8a65fb242855fa7071c8e785e18e0efbd91878a5"
+    },
+    {
+      "id": "1f0bd138-86e6-482b-8e3d-084706198ff7",
+      "filename": "1f0bd138-86e6-482b-8e3d-084706198ff7.png",
+      "mime": "image/png",
+      "size": 2779814,
+      "originalName": "1.docx · Запомни 1",
+      "sha256": "24450cd73ebcb71453beeaa6bf7313adee7cb866175f86ebbf242e210894e3e7"
+    },
+    {
+      "id": "bd5ab38b-09de-4ac3-a049-19ed3198b5c4",
+      "filename": "bd5ab38b-09de-4ac3-a049-19ed3198b5c4.jpg",
+      "mime": "image/jpeg",
+      "size": 127870,
+      "originalName": "Панорама 360°",
+      "sha256": "bcc63e9b364b4c595cd25d4a47c7836da97a3e95fd9e387e755546e825f41cbe"
+    },
+    {
+      "id": "290ade1c-7fa7-443e-bf78-bcfcaebe1f1b",
+      "filename": "290ade1c-7fa7-443e-bf78-bcfcaebe1f1b.jpg",
+      "mime": "image/jpeg",
+      "size": 36413,
+      "originalName": "1.docx · Фрагмент 2",
+      "sha256": "3466808613cc16f15cf8dfd118ec4df27b66b158e93b0db4fee9ba4353cc42f9"
+    },
+    {
+      "id": "9b23b408-1137-4e14-b510-4a41da9eb5b1",
+      "filename": "9b23b408-1137-4e14-b510-4a41da9eb5b1.jpg",
+      "mime": "image/jpeg",
+      "size": 213755,
+      "originalName": "1.docx · Полное изображение 2",
+      "sha256": "8fcdeb87c495da0535c9253803346828028659bd7d75688abb3702ae87579ada"
+    },
+    {
+      "id": "41c8ab87-fdcb-4ab1-a605-2e1cc87b94ad",
+      "filename": "41c8ab87-fdcb-4ab1-a605-2e1cc87b94ad.png",
+      "mime": "image/png",
+      "size": 2953400,
+      "originalName": "1.docx · Запомни 2",
+      "sha256": "3ed5b19b102f7871ae9fc1eb78c9a2e0f41b6473bf89621b113147ea6d159961"
+    },
+    {
+      "id": "c83f24ae-a8a3-48be-8086-2d2a14bfa87a",
+      "filename": "c83f24ae-a8a3-48be-8086-2d2a14bfa87a.jpg",
+      "mime": "image/jpeg",
+      "size": 35805,
+      "originalName": "1.docx · Фрагмент 3",
+      "sha256": "394b65e288786de4670cd37f9f6fd3f0103ad49feacb92938c0efced32fd802a"
+    },
+    {
+      "id": "0f713f28-a010-4c6b-94e4-5287bd05e1cb",
+      "filename": "0f713f28-a010-4c6b-94e4-5287bd05e1cb.webp",
+      "mime": "image/webp",
+      "size": 204080,
+      "originalName": "1.docx · Полное изображение 3",
+      "sha256": "b535900db72ec467638f7d2c41612d884672a9cdc22d913f6c20e4ac378146df"
+    },
+    {
+      "id": "0e9ac855-5476-472a-b001-5762e521d174",
+      "filename": "0e9ac855-5476-472a-b001-5762e521d174.png",
+      "mime": "image/png",
+      "size": 2410611,
+      "originalName": "1.docx · Запомни 3",
+      "sha256": "3126ba62ecc25be377f9df40ccd784246b4c0f6f2fd9f68188138243c0a1cd8d"
+    },
+    {
+      "id": "9f70b0e6-0b20-49d8-9693-fffaead0fa78",
+      "filename": "9f70b0e6-0b20-49d8-9693-fffaead0fa78.jpg",
+      "mime": "image/jpeg",
+      "size": 15913,
+      "originalName": "1.docx · Фрагмент 4",
+      "sha256": "7cfb29ba3667ceba0c05d09bc207fb7d3da1a10e22ff47948315842540297bad"
+    },
+    {
+      "id": "610eaaeb-c874-43e3-a40d-1064a20d451a",
+      "filename": "610eaaeb-c874-43e3-a40d-1064a20d451a.jpg",
+      "mime": "image/jpeg",
+      "size": 35419,
+      "originalName": "1.docx · Полное изображение 4",
+      "sha256": "d90d7c9a643c12cdc1c8d7cd7a147ca99ca65c918599f132e19572c7eade7d17"
+    },
+    {
+      "id": "fe6180cb-1c99-4723-8e44-28e580923aa2",
+      "filename": "fe6180cb-1c99-4723-8e44-28e580923aa2.png",
+      "mime": "image/png",
+      "size": 2114368,
+      "originalName": "1.docx · Запомни 4",
+      "sha256": "702c39b3a3c453da530a0dee2c13b1c87e4b2a4011019f90d0783e38c25c32c2"
+    },
+    {
+      "id": "803839a5-abd4-4779-81b2-f1aa57037772",
+      "filename": "803839a5-abd4-4779-81b2-f1aa57037772.jpg",
+      "mime": "image/jpeg",
+      "size": 349510,
+      "originalName": "1.docx · Фрагмент 5",
+      "sha256": "0ac67628c35d357f550f43097fe9d4d31f9ac57fc537007652ea8973d829448d"
+    },
+    {
+      "id": "393ed453-ad09-4b66-a94c-20b0b4813e84",
+      "filename": "393ed453-ad09-4b66-a94c-20b0b4813e84.webp",
+      "mime": "image/webp",
+      "size": 944576,
+      "originalName": "1.docx · Полное изображение 5",
+      "sha256": "58b44ed0f524ead4b184bdc38f5d5d774625369945bc7e86b7a4cb2b2b84d206"
+    },
+    {
+      "id": "f63101ee-9d9a-4107-9ccf-be1c1d8d620f",
+      "filename": "f63101ee-9d9a-4107-9ccf-be1c1d8d620f.png",
+      "mime": "image/png",
+      "size": 2550614,
+      "originalName": "1.docx · Запомни 5",
+      "sha256": "76364bb713782732b582a390347f60ee6e9f1accc5c4f95fbd82cee8c7c5249c"
+    },
+    {
+      "id": "b8a58a72-ebb2-4006-83c6-2f7f1f593cc1",
+      "filename": "b8a58a72-ebb2-4006-83c6-2f7f1f593cc1.jpg",
+      "mime": "image/jpeg",
+      "size": 29446,
+      "originalName": "1.docx · Фрагмент 6",
+      "sha256": "b3481a64d26545273e9b3158859078839b10743cdd8c1667b21482d849df1680"
+    },
+    {
+      "id": "b2d1053f-8b37-4167-a9cd-f170e16363dd",
+      "filename": "b2d1053f-8b37-4167-a9cd-f170e16363dd.webp",
+      "mime": "image/webp",
+      "size": 119532,
+      "originalName": "1.docx · Полное изображение 6",
+      "sha256": "bea3d35706ddf141cd7f02de3f166489f9dc1fa157c65a81c6da46e01a9f0a2c"
+    },
+    {
+      "id": "59bb5726-de5e-4a85-b958-f7bc611ffb94",
+      "filename": "59bb5726-de5e-4a85-b958-f7bc611ffb94.png",
+      "mime": "image/png",
+      "size": 2282883,
+      "originalName": "1.docx · Запомни 6",
+      "sha256": "023d31fa2a1adb23ba3a46d5314473ee0b472d3334b72035ad7adc13ff4b5fa9"
+    },
+    {
+      "id": "888c0007-8f35-4b01-b979-3fcf8033f5a4",
+      "filename": "888c0007-8f35-4b01-b979-3fcf8033f5a4.png",
+      "mime": "image/png",
+      "size": 229235,
+      "originalName": "1.docx · Фрагмент 7",
+      "sha256": "9ef233290b4cbcdcebd96f817c069ec97558fe748b645ccbbad46eb039a572ae"
+    },
+    {
+      "id": "743d21ee-6336-4abe-89af-29c65fb8028d",
+      "filename": "743d21ee-6336-4abe-89af-29c65fb8028d.webp",
+      "mime": "image/webp",
+      "size": 562436,
+      "originalName": "1.docx · Полное изображение 7",
+      "sha256": "09ef8dcdb9a664c63e2814d39fcedb4708a4f0269765776446faae8f92b8b245"
+    },
+    {
+      "id": "f3d41e67-1291-4466-be52-838bcc2b1d96",
+      "filename": "f3d41e67-1291-4466-be52-838bcc2b1d96.png",
+      "mime": "image/png",
+      "size": 2786306,
+      "originalName": "1.docx · Запомни 7",
+      "sha256": "e0bf807e9fb12fafc4ce52c409a4a66da306bcb4a82fe9e333e1e7ea8c8a2f46"
+    },
+    {
+      "id": "273002f6-19be-4458-a279-d43cb2a9f744",
+      "filename": "273002f6-19be-4458-a279-d43cb2a9f744.webp",
+      "mime": "image/webp",
+      "size": 354806,
+      "originalName": "1.docx · Фрагмент 8",
+      "sha256": "1b34936a090c8341389bcef64da462a0b2f046227917e79c63a902b8b1072cb8"
+    },
+    {
+      "id": "fc5112b3-b5d7-4a05-b55c-3d14687b3536",
+      "filename": "fc5112b3-b5d7-4a05-b55c-3d14687b3536.webp",
+      "mime": "image/webp",
+      "size": 199404,
+      "originalName": "1.docx · Полное изображение 8",
+      "sha256": "4a3005c802f7d39ce59d82907507827106004a7aa1adbd0dc3f4418c79ee5bd1"
+    },
+    {
+      "id": "0b052db7-ea20-461b-a742-85821a58edaa",
+      "filename": "0b052db7-ea20-461b-a742-85821a58edaa.png",
+      "mime": "image/png",
+      "size": 2497685,
+      "originalName": "1.docx · Запомни 8",
+      "sha256": "b947636943d8fa01ee0e2c4916828abc89b15ee8cfeaa59a74510c3f24239a3e"
+    },
+    {
+      "id": "0d50b482-119a-4483-b4e7-9c3cd9b74e5b",
+      "filename": "0d50b482-119a-4483-b4e7-9c3cd9b74e5b.png",
+      "mime": "image/png",
+      "size": 2535737,
+      "originalName": "1.docx · Запомни 9",
+      "sha256": "24a459f89aab0706e27146dc35b77f1e98dc1763fdd8c5079a0d2509581e3665"
+    },
+    {
+      "id": "f03a0425-d879-4411-bee2-c12ee9dcd170",
+      "filename": "f03a0425-d879-4411-bee2-c12ee9dcd170.png",
+      "mime": "image/png",
+      "size": 2561130,
+      "originalName": "1.docx · Запомни 10",
+      "sha256": "1ce2f2754587331b8313c72890c561809e8366f819472fa7a679648410d2de78"
+    },
+    {
+      "id": "cef74c0c-207d-48bc-bd77-ef51f3299ef5",
+      "filename": "cef74c0c-207d-48bc-bd77-ef51f3299ef5.jpg",
+      "mime": "image/jpeg",
+      "size": 4532714,
+      "originalName": "Оригинал панорамы 360°",
+      "sha256": "89fb70ecc544374e519c011e4899fbcba0762a751a8ed42d5fbc1fa293c0ed58"
+    },
+    {
+      "id": "aceecd9c-8c01-4b9c-987d-d4def83d086b",
+      "filename": "aceecd9c-8c01-4b9c-987d-d4def83d086b.jpg",
+      "mime": "image/jpeg",
+      "size": 158417,
+      "originalName": "Оригинал панорамы 360°",
+      "sha256": "ce265a5a7988c0961b453ab43f46d4076e2b981a597910ff60478eef85ecc03f"
+    }
+  ],
+  "mediaSettings": [
+    {
+      "id": "panorama-file:5df0d199-7418-48e1-8fb0-b839a4527556",
+      "data": "normalized-v1"
+    },
+    {
+      "id": "panorama-original:5df0d199-7418-48e1-8fb0-b839a4527556",
+      "data": "cef74c0c-207d-48bc-bd77-ef51f3299ef5"
+    },
+    {
+      "id": "panorama-file:bd5ab38b-09de-4ac3-a049-19ed3198b5c4",
+      "data": "normalized-v1"
+    },
+    {
+      "id": "panorama-original:bd5ab38b-09de-4ac3-a049-19ed3198b5c4",
+      "data": "aceecd9c-8c01-4b9c-987d-d4def83d086b"
+    }
+  ]
+}

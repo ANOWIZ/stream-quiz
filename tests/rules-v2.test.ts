@@ -7,6 +7,36 @@ import { project } from "../server/projection.js";
 import type { Store } from "../server/store.js";
 import { v2Fixture, hostV2 } from "./v2-fixture.js";
 
+it.each([0, 1, 6])(
+  "новые правила: старт и повтор с %s игроками без готовности",
+  (count) => {
+    const { state: s, send, questions } = v2Fixture(count);
+    expect(s.players.every((p) => !p.ready)).toBe(true);
+    send("start");
+    expect(s.phase).toBe("intro");
+    expect(s.roster).toHaveLength(count);
+    expect(s.order).toHaveLength(count);
+    send("begin");
+    const question = questions.find((q) => q.round === 1)!;
+    send("choose", question.id);
+    if (count === 0) {
+      expect(s.phase).toBe("awaitingReveal");
+      expect(s.answers).toEqual({});
+    } else send("point", question.answer, activeId(s)!);
+    send("reveal", "ЗАВЕРШИТЬ ОЖИДАНИЕ");
+    expect(s.phase).toBe("reveal");
+    expect(Object.keys(s.answers)).not.toContain("null");
+    expect(Number.isFinite(s.turn)).toBe(true);
+    send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
+    expect(s.phase).toBe("intro");
+    expect(s.round).toBe(2);
+    send("restartGame", "НАЧАТЬ ИГРУ ЗАНОВО");
+    expect(s.round).toBe(1);
+    expect(s.players).toHaveLength(count);
+    expect(s.players.every((p) => p.score === 0)).toBe(true);
+  },
+);
+
 it.each([
   [40, 35, "percent", "equal", true],
   [40, 34, "percent", "higher", false],

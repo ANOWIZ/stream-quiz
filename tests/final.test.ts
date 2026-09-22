@@ -45,6 +45,7 @@ it("финал: скрытые ставки, фиксация последнег
   expect(v.question).not.toHaveProperty("answer");
   applyCommand(s, who(b), { type: "bet", value: 400 }, [], 3);
   expect(s.phase).toBe("locating");
+  expect(s.timer.deadline).toBe(60003);
   applyCommand(s, who(a), { type: "country", value: q.answer }, [], 4);
   applyCommand(s, who(b), { type: "country", value: "DE" }, [], 5);
   expect(project(store, who(a), new Set()).countries[b.id]).toBeUndefined();

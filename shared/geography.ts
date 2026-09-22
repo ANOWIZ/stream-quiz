@@ -1,6 +1,7 @@
 import { geoBounds, geoCentroid, geoContains, geoArea } from "d3-geo";
 import type { Feature, Geometry } from "geojson";
 import type { GeoPoint } from "./content.js";
+export const WORLD_MAP_VERSION = "host-regions-2026-09-21-r2";
 export type CountryFeature = Feature<Geometry, { code: string; name: string }>;
 export function containsPoint(
   country: CountryFeature,

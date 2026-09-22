@@ -3,7 +3,15 @@ import { Store } from "../server/store.js";
 import { migrateDisplayNames } from "../server/display-names.js";
 import { upgradeConfig } from "../shared/config.js";
 import { expire } from "../server/game.js";
-import { afterAll, afterEach, beforeAll, beforeEach, expect, it } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import {
   mkdtempSync,
   renameSync,
@@ -19,7 +27,12 @@ import { PrismaClient } from "@prisma/client";
 import { io, type Socket } from "socket.io-client";
 import type { AddressInfo } from "node:net";
 import { createApp } from "../server/app.js";
-import { initialState, beginQuestion } from "../server/game.js";
+import { initialState, beginQuestion, addPoints } from "../server/game.js";
+import { v2Fixture } from "./v2-fixture.js";
+import {
+  migrateImportedFragments,
+  FRAGMENT_CLEANUP,
+} from "../server/imported-fragments.js";
 import type { Ack, GameView, Role } from "../shared/types.js";
 import type { MediaRow } from "../shared/editor-types.js";
 let runtime: Awaited<ReturnType<typeof createApp>>;
@@ -112,6 +125,372 @@ async function room() {
   const b = await connect((await login("player", "Борис")).cookie, "player");
   return { h, a, b };
 }
+it.each([1, 2] as const)(
+  "журнал новой партии v%s пуст, сохраняет новые очки и откатывается при ошибке",
+  async (version) => {
+    const { h } = version === 2 ? await newRulesRoom() : await room();
+    if (version === 1) expect((await h.send("start")).ok).toBe(true);
+    const playerId = h.view.players[0].id;
+    const score = async (host: Peer, amount: number) => {
+      expect(
+        (
+          await host.send("score", {
+            playerId,
+            amount,
+            reason: "Проверка журнала партии",
+          })
+        ).ok,
+      ).toBe(true);
+    };
+    await score(h, 1000);
+    await score(h, -1700);
+    const events = structuredClone(h.view.events);
+    expect(events).toHaveLength(2);
+    const before = structuredClone(runtime.store.state);
+    const failure = vi
+      .spyOn(runtime.store.db, "$transaction")
+      .mockRejectedValueOnce(new Error("Ошибка сохранения журнала"));
+    expect((await h.send("restartGame", "НАЧАТЬ ИГРУ ЗАНОВО")).ok).toBe(false);
+    failure.mockRestore();
+    expect(runtime.store.state).toEqual(before);
+    expect(runtime.store.events).toEqual(events);
+    expect(
+      await runtime.store.db.event.count({ where: { type: "score_change" } }),
+    ).toBe(2);
+    expect((await h.send("restartGame", "НАЧАТЬ ИГРУ ЗАНОВО")).ok).toBe(true);
+    expect(h.view.events).toEqual([]);
+    expect(h.view.players.every((p) => p.score === 0)).toBe(true);
+    expect(
+      await runtime.store.db.event.count({ where: { type: "score_change" } }),
+    ).toBe(0);
+    await score(h, 333);
+    expect((await h.send("restartRound", "НАЧАТЬ РАУНД ЗАНОВО")).ok).toBe(true);
+    expect(h.view.events).toHaveLength(1);
+    expect((await h.send("nextRound", "СЛЕДУЮЩИЙ РАУНД")).ok).toBe(true);
+    expect(h.view.events).toHaveLength(1);
+    expect((await h.send("reset", "СБРОС")).ok).toBe(true);
+    expect(h.view.events).toEqual([]);
+    await score(h, 44);
+    expect(h.view.events).toHaveLength(1);
+    expect((await h.send("start")).ok).toBe(true);
+    expect(h.view.events).toEqual([]);
+    await score(h, 12);
+    expect((await h.send("start")).ok).toBe(false);
+    expect(h.view.events).toHaveLength(1);
+    const cookie = h.cookie;
+    await runtime.close();
+    await start();
+    const restored = await connect(cookie, "host");
+    expect(restored.view.events).toHaveLength(1);
+    expect(restored.view.events[0].message).toContain("+12 очков");
+    expect((await restored.send("endGame", "ЗАВЕРШИТЬ ИГРУ")).ok).toBe(true);
+    expect(restored.view.events).toEqual([]);
+    expect(
+      await runtime.store.db.event.count({ where: { type: "score_change" } }),
+    ).toBe(0);
+  },
+);
+it.each([1, 2] as const)(
+  "завершение игры v%s возвращает пустое лобби, отзывает все сессии игроков и разрешает новый вход",
+  async (version) => {
+    const { h, a, b } = version === 2 ? await newRulesRoom() : await room();
+    if (version === 1) expect((await h.send("start")).ok).toBe(true);
+    const extraTab = await connect(a.cookie, "player");
+    const oldPlayerIds = h.view.players.map((p) => p.id);
+    expect(
+      (
+        await h.send("score", {
+          playerId: oldPlayerIds[0],
+          amount: 777,
+          reason: "До завершения",
+        })
+      ).ok,
+    ).toBe(true);
+    expect((await h.send("begin")).ok).toBe(true);
+    expect((await h.send("choose", h.view.board[0].id)).ok).toBe(true);
+    expect((await h.send("pause")).ok).toBe(true);
+    const before = structuredClone(runtime.store.state);
+    const questionCount = await runtime.store.db.question.count();
+    const mediaCount = await runtime.store.db.media.count();
+    expect((await a.send("endGame", "ЗАВЕРШИТЬ ИГРУ")).ok).toBe(false);
+    expect((await h.send("endGame")).ok).toBe(false);
+    b.socket.disconnect();
+    const failSave = vi
+      .spyOn(runtime.store.db, "$transaction")
+      .mockRejectedValueOnce(new Error("Тест ошибки сохранения"));
+    expect((await h.send("endGame", "ЗАВЕРШИТЬ ИГРУ")).ok).toBe(false);
+    failSave.mockRestore();
+    expect(runtime.store.state).toEqual(before);
+    expect(a.socket.connected).toBe(true);
+    expect(
+      (await request("/api/session?role=player", undefined, b.cookie)).ok,
+    ).toBe(true);
+    const envelope = {
+      id: randomUUID(),
+      revision: h.view.revision,
+      phase: h.view.phase,
+      roundEpoch: h.view.roundEpoch,
+      finalAttemptId: h.view.finalAttemptId,
+      command: { type: "endGame", value: "ЗАВЕРШИТЬ ИГРУ" },
+    };
+    expect(
+      (await h.socket.timeout(5000).emitWithAck("command", envelope)).ok,
+    ).toBe(true);
+    await waitFor(
+      () =>
+        h.view.phase === "lobby" &&
+        !a.socket.connected &&
+        !extraTab.socket.connected,
+    );
+    expect(h.socket.connected).toBe(true);
+    expect(h.view.players).toEqual([]);
+    expect(h.view.joinOpen).toBe(true);
+    expect(h.view.paused).toBe(false);
+    expect(h.view.timer).toEqual({ deadline: null, remaining: null });
+    expect(h.view.config).toEqual(before.config);
+    expect(runtime.store.state.selectedPackageId).toBe(
+      before.selectedPackageId,
+    );
+    expect(runtime.store.state.finalSelection).toBeNull();
+    expect(runtime.store.state.question).toBeNull();
+    expect(runtime.store.history).toEqual([]);
+    expect((await h.send("undo")).ok).toBe(false);
+    expect(
+      await runtime.store.db.session.count({ where: { role: "player" } }),
+    ).toBe(0);
+    for (const peer of [a, b]) {
+      expect(
+        (await request("/api/session?role=player", undefined, peer.cookie))
+          .status,
+      ).toBe(401);
+    }
+    expect(
+      (await request("/api/session?role=host", undefined, h.cookie)).ok,
+    ).toBe(true);
+    expect(await runtime.store.db.question.count()).toBe(questionCount);
+    expect(await runtime.store.db.media.count()).toBe(mediaCount);
+    const oldSocket = io(base, {
+      autoConnect: false,
+      auth: { role: "player" },
+      extraHeaders: { Cookie: b.cookie },
+      transports: ["websocket"],
+    });
+    sockets.push(oldSocket);
+    const denied = new Promise<Error & { data?: { code: string } }>((resolve) =>
+      oldSocket.once("connect_error", resolve),
+    );
+    oldSocket.connect();
+    expect((await denied).data?.code).toBe("SESSION_ENDED");
+    oldSocket.disconnect();
+    const rejoined = await login("player", "Алиса");
+    expect(rejoined.res.ok).toBe(true);
+    const newPlayer = await connect(rejoined.cookie, "player");
+    expect(oldPlayerIds).not.toContain(newPlayer.view.self.playerId);
+    expect(newPlayer.view.players[0].score).toBe(0);
+    expect(
+      (await h.socket.timeout(5000).emitWithAck("command", envelope)).ok,
+    ).toBe(true);
+    expect(newPlayer.socket.connected).toBe(true);
+    expect(
+      (
+        await h.socket
+          .timeout(5000)
+          .emitWithAck("command", { ...envelope, id: randomUUID() })
+      ).ok,
+    ).toBe(false);
+    const hostCookie = h.cookie;
+    await runtime.close();
+    await start();
+    const restoredHost = await connect(hostCookie, "host");
+    const restoredPlayer = await connect(rejoined.cookie, "player");
+    expect(restoredHost.view.phase).toBe("lobby");
+    expect(restoredHost.view.players).toHaveLength(1);
+    expect(restoredPlayer.view.self.playerId).toBe(
+      newPlayer.view.self.playerId,
+    );
+    expect(
+      (await restoredHost.socket.timeout(5000).emitWithAck("command", envelope))
+        .ok,
+    ).toBe(true);
+    expect(restoredPlayer.socket.connected).toBe(true);
+  },
+);
+it.each([1, 2] as const)(
+  "правила %s: пауза и изменённый финальный таймер синхронизируются, переживают перезапуск и защищены от устаревших команд",
+  async (version) => {
+    const { h, a, b } = version === 2 ? await newRulesRoom() : await room();
+    if (version === 2) {
+      for (let i = 1; i < 6; i++)
+        expect((await h.send("nextRound", "СЛЕДУЮЩИЙ РАУНД")).ok).toBe(true);
+      expect((await h.send("begin")).ok).toBe(true);
+      expect((await h.send("beginLocation", "ЗАВЕРШИТЬ СТАВКИ")).ok).toBe(true);
+      await waitFor(
+        () =>
+          a.view.phase === "loadingPanorama" &&
+          b.view.phase === "loadingPanorama",
+      );
+      for (const peer of [h, a, b])
+        expect((await peer.send("panoramaReady")).ok).toBe(true);
+    } else {
+      await runtime.store.serial(() =>
+        runtime.store.mutate(() => {
+          const s = runtime.store.state;
+          s.round = 6;
+          s.roster = s.order = s.players.map((p) => p.id);
+          beginQuestion(
+            s,
+            runtime.store.bank.find((q) => q.round === 6)!,
+            Date.now(),
+          );
+          return "Подготовка финального теста";
+        }),
+      );
+      await waitFor(() => h.view.phase === "betting");
+      expect((await h.send("beginLocation")).ok).toBe(true);
+    }
+    await waitFor(() =>
+      [h, a, b].every((peer) => peer.view.phase === "locating"),
+    );
+    expect((await h.send("timer", 20)).ok).toBe(true);
+    expect((await h.send("pause")).ok).toBe(true);
+    await waitFor(() => a.view.paused && b.view.paused);
+    const choice =
+      version === 1
+        ? "ZA"
+        : { code: "ZA", point: { latitude: -30, longitude: 25 } };
+    expect((await a.send("country", choice)).ok).toBe(true);
+    expect((await a.send("confirmCountry")).ok).toBe(true);
+    expect((await a.send("country", choice)).ok).toBe(false);
+    expect((await a.send("timer", 40)).ok).toBe(false);
+    expect((await h.send("timer", 40)).ok).toBe(true);
+    await waitFor(() =>
+      [h, a, b].every((peer) => peer.view.timer.remaining === 40000),
+    );
+    expect(runtime.store.state.countries[a.view.self.playerId!]).toMatchObject({
+      code: "ZA",
+      locked: true,
+    });
+    expect(h.view.countries).toEqual({});
+    expect(b.view.countries[a.view.self.playerId!]).toBeUndefined();
+    const cookies = [h.cookie, a.cookie, b.cookie];
+    await runtime.close();
+    await start();
+    const host = await connect(cookies[0], "host");
+    const players = [
+      await connect(cookies[1], "player"),
+      await connect(cookies[2], "player"),
+    ];
+    for (const peer of [host, ...players]) {
+      expect(peer.view.paused).toBe(true);
+      expect(peer.view.timer).toEqual({ deadline: null, remaining: 40000 });
+    }
+    expect((await host.send("resume")).ok).toBe(true);
+    await waitFor(() =>
+      players.every(
+        (peer) => !peer.view.paused && peer.view.timer.deadline !== null,
+      ),
+    );
+    const deadline = runtime.store.state.timer.deadline!;
+    expect(deadline - Date.now()).toBeGreaterThan(38000);
+    expect(deadline - Date.now()).toBeLessThanOrEqual(40000);
+    for (const peer of players) expect(peer.view.timer.deadline).toBe(deadline);
+    expect((await players[1].send("country", choice)).ok).toBe(true);
+    const stale = {
+      id: randomUUID(),
+      revision: host.view.revision,
+      phase: host.view.phase,
+      finalAttemptId: host.view.finalAttemptId,
+      roundEpoch: host.view.roundEpoch,
+      command: { type: "timer", value: 40, questionId: host.view.question?.id },
+    };
+    await runtime.store.serial(() =>
+      runtime.store.mutate(() => {
+        expire(runtime.store.state, deadline);
+        return "Истечение тестового таймера";
+      }),
+    );
+    const response = await host.socket
+      .timeout(5000)
+      .emitWithAck("command", stale);
+    expect(response).toMatchObject({
+      ok: false,
+      error: "Фаза изменилась. Проверьте экран.",
+    });
+    expect(runtime.store.state.phase).toBe("awaitingReveal");
+    expect(runtime.store.state.timer).toEqual({
+      deadline: null,
+      remaining: null,
+    });
+  },
+);
+it("меняет своё имя во время игры, сохраняет сессию и записывает только изменения очков", async () => {
+  const { h, a, b } = await room();
+  const id = a.view.self.playerId!;
+  expect((await h.send("start")).ok).toBe(true);
+  expect((await h.send("begin")).ok).toBe(true);
+  expect((await h.send("choose", h.view.board[0].id)).ok).toBe(true);
+  expect(
+    (await h.send("score", { playerId: id, amount: 100, reason: "Поправка" }))
+      .ok,
+  ).toBe(true);
+  const phase = a.view.phase;
+  const order = a.view.order;
+  expect((await a.send("rename", "  Новая Алиса  ")).ok).toBe(true);
+  await waitFor(() =>
+    h.view.players.some((p) => p.id === id && p.name === "Новая Алиса"),
+  );
+  expect(a.view.self.name).toBe("Новая Алиса");
+  expect(a.view.phase).toBe(phase);
+  expect(a.view.order).toEqual(order);
+  expect(a.view.players.find((p) => p.id === id)?.score).toBe(100);
+  expect((await b.send("rename", "новая алиса")).ok).toBe(false);
+  expect((await a.send("rename", " ")).ok).toBe(false);
+  expect((await a.send("rename", "а".repeat(31))).ok).toBe(false);
+  expect((await a.send("rename", "А\u200b")).ok).toBe(false);
+  expect((await h.send("rename", "Игрок")).ok).toBe(false);
+  const logCount = h.view.events.length;
+  expect((await h.send("pause")).ok).toBe(true);
+  expect((await a.send("rename", "Алиса снова")).ok).toBe(true);
+  expect(h.view.events.length).toBe(logCount);
+  expect((await h.send("resume")).ok).toBe(true);
+  expect(
+    (
+      await h.send("score", {
+        playerId: id,
+        amount: -40,
+        reason: "Поправка вниз",
+      })
+    ).ok,
+  ).toBe(true);
+  expect(h.view.events[0].message).toBe("Алиса снова: −40 очков");
+  expect(h.view.events[1].message).toBe("Алиса: +100 очков");
+  expect(
+    (
+      await runtime.store.db.session.findFirstOrThrow({
+        where: { playerId: id },
+      })
+    ).name,
+  ).toBe("Алиса снова");
+  const cookie = a.cookie;
+  await runtime.close();
+  await start();
+  const restored = await connect(cookie, "player");
+  expect(restored.view.self.playerId).toBe(id);
+  expect(restored.view.self.name).toBe("Алиса снова");
+  expect(restored.view.players.find((p) => p.id === id)?.score).toBe(60);
+  expect(
+    (
+      await (
+        await request("/api/session?role=player", undefined, cookie)
+      ).json()
+    ).self.name,
+  ).toBe("Алиса снова");
+  expect(
+    runtime.store.events.every((e) =>
+      /^[^\n]+: [+−]\d+ очков$/.test(e.message),
+    ),
+  ).toBe(true);
+});
 beforeAll(async () => {
   process.env.HOST_PASSWORD = hostPassword;
   process.env.PLAYER_PASSWORD = playerPassword;
@@ -1309,6 +1688,164 @@ it.each([true, false])(
   },
 );
 
+it.each([1, 2])(
+  "предыдущий раунд v%s сохраняется, защищён от повторов и откатывается при ошибке записи",
+  async (version) => {
+    const { h, a } = version === 2 ? await newRulesRoom() : await room();
+    if (version === 1) expect((await h.send("start")).ok).toBe(true);
+    const id = a.view.self.playerId!;
+    await runtime.store.serial(() =>
+      runtime.store.mutate(() => {
+        addPoints(runtime.store.state, id, 1000);
+        return "Тестовое игровое начисление";
+      }),
+    );
+    await waitFor(() =>
+      h.view.players.some((p) => p.id === id && p.score === 1000),
+    );
+    expect((await h.send("nextRound", "СЛЕДУЮЩИЙ РАУНД")).ok).toBe(true);
+    expect(
+      (
+        await h.send("score", {
+          playerId: id,
+          amount: 77,
+          reason: "Ручная поправка",
+        })
+      ).ok,
+    ).toBe(true);
+    expect(h.view.canPreviousRound).toBe(true);
+    expect(a.view.canPreviousRound).toBeUndefined();
+    expect((await a.send("previousRound", "ПРЕДЫДУЩИЙ РАУНД")).ok).toBe(false);
+    const envelope = {
+      id: randomUUID(),
+      revision: h.view.revision,
+      phase: h.view.phase,
+      roundEpoch: h.view.roundEpoch,
+      finalAttemptId: null,
+      command: { type: "previousRound", value: "ПРЕДЫДУЩИЙ РАУНД" },
+    };
+    const before = structuredClone(runtime.store.state);
+    vi.spyOn(runtime.store.db, "$transaction").mockRejectedValueOnce(
+      new Error("Test write failure"),
+    );
+    expect((await h.socket.emitWithAck("command", envelope)).ok).toBe(false);
+    expect(runtime.store.state).toEqual(before);
+    expect(
+      (
+        await h.socket.emitWithAck("command", {
+          ...envelope,
+          id: randomUUID(),
+          revision: envelope.revision - 1,
+        })
+      ).ok,
+    ).toBe(false);
+    expect((await h.socket.emitWithAck("command", envelope)).ok).toBe(true);
+    await waitFor(() => h.view.round === 1);
+    expect(h.view.players.find((p) => p.id === id)!.score).toBe(77);
+    expect(runtime.store.history).toEqual([]);
+    expect((await h.socket.emitWithAck("command", envelope)).ok).toBe(true);
+    const cookie = h.cookie;
+    await runtime.close();
+    await start();
+    const restored = await connect(cookie, "host");
+    expect(restored.view.round).toBe(1);
+    expect(restored.view.players.find((p) => p.id === id)!.score).toBe(77);
+    expect((await restored.socket.emitWithAck("command", envelope)).ok).toBe(
+      true,
+    );
+    expect(
+      (
+        await restored.socket.emitWithAck("command", {
+          ...envelope,
+          id: randomUUID(),
+          revision: restored.view.revision,
+          command: { type: "begin" },
+        })
+      ).ok,
+    ).toBe(false);
+    expect((await restored.send("nextRound", "СЛЕДУЮЩИЙ РАУНД")).ok).toBe(true);
+    const saved = new Store(runtime.store.db);
+    await saved.init(false);
+    expect(saved.state.roundCheckpoints[1].awards).toEqual({});
+  },
+);
+
+it("удаление двух учебных фрагментов сохраняет восемь своих, очки и восстановление старого раунда", async () => {
+  const f = v2Fixture();
+  const s = f.state;
+  const pack = s.packageSnapshot!;
+  pack.id = "docx1-20260920";
+  const fragments = pack.questions.filter((q) => q.round === 4);
+  fragments.forEach(
+    (q, i) =>
+      (q.id =
+        i < 8 ? `docx1-20260920-r4-${i + 1}` : `demo-v2-fragment-${i - 8}`),
+  );
+  f.send("start");
+  for (let i = 1; i < 4; i++) f.send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
+  s.roundCheckpoints = {};
+  f.send("begin");
+  f.send("choose", fragments[8].id);
+  const playerId = s.players[0].id;
+  addPoints(s, playerId, 1500);
+  s.phase = "reveal";
+  s.used = [...new Set([...s.used, ...fragments.map((q) => q.id)])];
+  const old = structuredClone(s);
+  f.send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
+  s.roundCheckpoints = {};
+  const db = runtime.store.db;
+  const other = await db.setting.findUniqueOrThrow({
+    where: { id: "package:demo-v2-51" },
+  });
+  await db.setting.upsert({
+    where: { id: "package:" + pack.id },
+    create: { id: "package:" + pack.id, data: JSON.stringify(pack) },
+    update: { data: JSON.stringify(pack) },
+  });
+  await db.game.update({
+    where: { id: "main" },
+    data: { state: JSON.stringify(s), history: JSON.stringify([old]) },
+  });
+  expect(await migrateImportedFragments(db)).toBe(true);
+  const clean = new Store(db);
+  await clean.init(false);
+  expect(
+    clean.state.packageSnapshot!.questions.filter((q) => q.round === 4),
+  ).toHaveLength(8);
+  expect(
+    clean.packages
+      .find((p) => p.id === pack.id)!
+      .questions.filter((q) => q.round === 4),
+  ).toHaveLength(8);
+  expect(clean.state.players[0].score).toBe(1500);
+  expect(clean.history[0].question).toBeNull();
+  expect(clean.history[0].total).toBe(8);
+  expect(clean.history[0].completed).toBe(8);
+  expect(clean.state.roundCheckpoints[4].awards[playerId]).toBe(1500);
+  expect(clean.state.roundCheckpoints[4].boardIds).toHaveLength(8);
+  expect(clean.history[0].roundCheckpoints).toEqual({});
+  expect(
+    await db.setting.findUniqueOrThrow({ where: { id: other.id } }),
+  ).toEqual(other);
+  const saved = await db.game.findUniqueOrThrow({ where: { id: "main" } });
+  expect(JSON.parse(saved.state).roundCheckpoints[4].awards[playerId]).toBe(
+    1500,
+  );
+  expect(await migrateImportedFragments(db)).toBe(false);
+  expect(await db.game.findUniqueOrThrow({ where: { id: "main" } })).toEqual(
+    saved,
+  );
+  const backup = JSON.parse(
+    (await db.setting.findUniqueOrThrow({ where: { id: FRAGMENT_CLEANUP } }))
+      .data,
+  );
+  expect(
+    JSON.parse(backup.game.state).packageSnapshot.questions.filter(
+      (q: { round: number }) => q.round === 4,
+    ),
+  ).toHaveLength(10);
+});
+
 it("перезапуск раунда сохраняется в SQLite, повторы и запоздавшие действия безопасны", async () => {
   const { h, a } = await room();
   expect((await h.send("start")).ok).toBe(true);
@@ -1503,6 +2040,108 @@ async function newRulesRoom() {
   expect((await peers.h.send("start")).ok).toBe(true);
   return peers;
 }
+it("опубликованный диапазон обновляет пакет, но не текущую партию; новый старт и повтор используют его после перезапуска", async () => {
+  const { h, a, b } = await room();
+  expect(
+    (await request("/api/editor/settings", upgradeConfig(), h.cookie)).ok,
+  ).toBe(true);
+  const source = runtime.store.bank.find((q) => q.round === 1)!;
+  const question = {
+    ...source,
+    id: randomUUID(),
+    min: 0,
+    max: 300,
+    answer: 151,
+    numericKind: "number",
+    unit: "видов",
+    acceptedMin: undefined,
+    acceptedMax: undefined,
+  };
+  expect((await request("/api/editor/questions", question, h.cookie)).ok).toBe(
+    true,
+  );
+  const id = randomUUID();
+  expect(
+    (
+      await request(
+        "/api/editor/packages",
+        { id, name: "Диапазон 145–155", questionIds: [question.id] },
+        h.cookie,
+      )
+    ).ok,
+  ).toBe(true);
+  expect(
+    (await request(`/api/editor/packages/${id}/use`, {}, h.cookie)).ok,
+  ).toBe(true);
+  expect((await h.send("start")).ok).toBe(true);
+  const snapshot = structuredClone(runtime.store.state.packageSnapshot);
+  const changed = { ...question, acceptedMin: 145, acceptedMax: 155 };
+  expect((await request("/api/editor/questions", changed, h.cookie)).ok).toBe(
+    true,
+  );
+  expect(runtime.store.state.packageSnapshot).toEqual(snapshot);
+  const pack = runtime.store.packages.find((p) => p.id === id)!;
+  expect(pack.revision).toBe(2);
+  expect(pack.questions[0]).toMatchObject({
+    acceptedMin: 145,
+    acceptedMax: 155,
+  });
+  const saved = await runtime.store.db.setting.findUnique({
+    where: { id: "package:" + id },
+  });
+  expect(JSON.parse(saved!.data).questions[0]).toMatchObject({
+    acceptedMin: 145,
+    acceptedMax: 155,
+  });
+  await runtime.store.refreshBank();
+  expect(runtime.store.packages.find((p) => p.id === id)!.revision).toBe(2);
+  const cookies = [h.cookie, a.cookie, b.cookie];
+  await runtime.close();
+  await start();
+  const host = await connect(cookies[0], "host");
+  const players = await Promise.all(
+    cookies.slice(1).map((cookie) => connect(cookie, "player")),
+  );
+  expect(runtime.store.state.packageSnapshot).toEqual(snapshot);
+  for (const [value, correct] of [
+    [144, false],
+    [145, true],
+    [155, true],
+    [156, false],
+  ] as const) {
+    expect((await host.send("restartGame", "НАЧАТЬ ИГРУ ЗАНОВО")).ok).toBe(
+      true,
+    );
+    expect((await host.send("begin")).ok).toBe(true);
+    expect((await host.send("choose", host.view.board[0].id)).ok).toBe(true);
+    const active = players.find(
+      (p) => p.view.self.playerId === host.view.activePlayerId,
+    )!;
+    await waitFor(() => active.view.phase === "point");
+    expect(active.view.question?.acceptedMin).toBeUndefined();
+    expect(active.view.question?.acceptedMax).toBeUndefined();
+    expect((await active.send("point", value)).ok).toBe(true);
+    expect((await host.send("reveal", "ЗАВЕРШИТЬ ОЖИДАНИЕ")).ok).toBe(true);
+    const playerId = active.view.self.playerId!;
+    expect(host.view.question).toMatchObject({
+      acceptedMin: 145,
+      acceptedMax: 155,
+    });
+    expect(host.view.answerResults?.[playerId]).toBe(
+      correct ? "correct" : "wrong",
+    );
+    expect(host.view.players.find((p) => p.id === playerId)!.score).toBe(
+      correct ? host.view.config.comparison.points : 0,
+    );
+  }
+  expect((await host.send("reset", "СБРОС")).ok).toBe(true);
+  expect((await host.send("start")).ok).toBe(true);
+  expect(runtime.store.state.packageSnapshot!.questions[0]).toMatchObject({
+    acceptedMin: 145,
+    acceptedMax: 155,
+  });
+});
+
 it("пакет v2: полнота, права черновиков, отдельный фрагмент и immutable снимок", async () => {
   const { h, a } = await newRulesRoom();
   const pack = runtime.store.state.packageSnapshot!;

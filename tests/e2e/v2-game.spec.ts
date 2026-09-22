@@ -182,10 +182,7 @@ test("свободное количество вопросов: редактор
     await h
       .getByRole("button", { name: "Показать ответ", exact: true })
       .click();
-    await h
-      .getByRole("dialog")
-      .getByRole("button", { name: "Подтвердить", exact: true })
-      .click();
+    await expect(h.getByRole("dialog")).toHaveCount(0);
     await expect(h.locator("#main")).toHaveAttribute("data-phase", "reveal");
     await h
       .getByRole("button", { name: "Следующий вопрос", exact: true })
@@ -238,8 +235,9 @@ async function clickCountry(
     await expect(
       page.locator('[data-country="' + code + '"]').first(),
     ).toHaveAttribute("aria-pressed", "true");
+  return point;
 }
-test("кнопка новой партии сохраняет состав, подтверждение и повтор после финала", async ({
+test("кнопки предыдущего раунда и новой партии сохраняют состав и работают после финала", async ({
   browser,
 }) => {
   const credentials = JSON.parse(
@@ -287,6 +285,50 @@ test("кнопка новой партии сохраняет состав, по
     0,
   );
 
+  const previous = h.getByRole("button", {
+    name: "Предыдущий раунд",
+    exact: true,
+  });
+  await expect(previous).toBeEnabled();
+  await expect(
+    a.getByRole("button", { name: "Предыдущий раунд", exact: true }),
+  ).toHaveCount(0);
+  await previous.click();
+  const dialog = h.locator(".game-dialog-overlay");
+  await expect(dialog).toContainText("текущего и предыдущего раундов");
+  await dialog.getByRole("button", { name: "Отмена", exact: true }).click();
+  expect(view.round).toBe(2);
+  await previous.click();
+  await dialog
+    .getByRole("button", { name: "Подтвердить", exact: true })
+    .click();
+  await expect(h.locator("#main")).toHaveAttribute("data-round", "1");
+  await expect(a.locator("#main")).toHaveAttribute("data-phase", "intro");
+  expect(view.players[0].score).toBe(1000);
+  expect(view.players.map((p) => p.id)).toEqual(ids);
+  expect(view.paused).toBe(false);
+  await expect(previous).toHaveCount(0);
+  await send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
+  await send("pause");
+  await h.reload();
+  await expect(previous).toBeEnabled();
+  const answers = h.getByRole("group", { name: "Ответы ведущего" });
+  await expect(answers.getByRole("button")).toHaveCount(3);
+  for (const button of await answers.getByRole("button").all()) {
+    await expect(button).toBeVisible();
+    await expect(button).toBeDisabled();
+  }
+  await expect(
+    h
+      .locator("#controls")
+      .getByRole("button", { name: /^(Верно|Неверно|Показать ответ)$/ }),
+  ).toHaveCount(0);
+  await previous.scrollIntoViewIfNeeded();
+  await h.screenshot({
+    path: "test-results/previous-round-button.png",
+    fullPage: true,
+  });
+
   await h.getByRole("button", { name: label, exact: true }).click();
   await h
     .locator(".game-dialog-overlay")
@@ -318,6 +360,7 @@ test("кнопка новой партии сохраняет состав, по
   await wait(() => view.phase === "awaitingReveal");
   await send("reveal");
   await expect(h.locator("#main")).toHaveAttribute("data-phase", "finished");
+  await expect(previous).toBeEnabled();
   await expect(
     h.getByRole("button", { name: label, exact: true }),
   ).toBeVisible();
@@ -335,6 +378,109 @@ test("кнопка новой партии сохраняет состав, по
   await expect(a.locator("#main")).toHaveAttribute("data-phase", "intro");
   expect(view.players.map((p) => p.id)).toEqual(ids);
   expect(view.finalSelection?.id).toBe("demo-v2-geography");
+});
+
+test("диапазон редактора попадает в игру, раскрытие ответа без лишнего подтверждения", async ({
+  browser,
+}) => {
+  const credentials = JSON.parse(
+    readFileSync(".local/e2e/credentials.json", "utf8"),
+  );
+  const data: EditorData = await (await api.get("/api/editor")).json();
+  const source = data.questions.find((q) => q.round === 1)!;
+  const q = {
+    ...source,
+    id: randomUUID(),
+    category: "Проверка допуска",
+    text: "Проверка диапазона 151",
+    min: 0,
+    max: 300,
+    answer: 151,
+    unit: "видов",
+    numericKind: "number",
+    acceptedMin: undefined,
+    acceptedMax: undefined,
+    active: true,
+  };
+  expect((await api.post("/api/editor/questions", { data: q })).ok()).toBe(
+    true,
+  );
+  const packId = randomUUID();
+  expect(
+    (
+      await api.post("/api/editor/packages", {
+        data: { id: packId, name: "Проверка диапазона", questionIds: [q.id] },
+      })
+    ).ok(),
+  ).toBe(true);
+  expect(
+    (await api.post(`/api/editor/packages/${packId}/use`, { data: {} })).ok(),
+  ).toBe(true);
+  const h = await pageFor(browser, await api.storageState(), true);
+  await h.getByRole("button", { name: "Вопросы", exact: true }).click();
+  await h.getByRole("button", { name: q.text, exact: true }).click();
+  await h.getByLabel("Засчитывать от", { exact: true }).fill("145");
+  await h.getByLabel("Засчитывать до", { exact: true }).fill("155");
+  await h.getByLabel("Пояснение после раскрытия", { exact: true }).fill("");
+  await h
+    .getByRole("button", { name: "Сохранить вопрос", exact: true })
+    .click();
+  await expect(h.locator(".success")).toContainText("Вопрос опубликован");
+  const saved: EditorData = await (await api.get("/api/editor")).json();
+  expect(saved.questions.find((row) => row.id === q.id)?.explanation).toBe("");
+  const p = await request.newContext({ baseURL: base });
+  expect(
+    (
+      await p.post("/api/login", {
+        data: {
+          role: "player",
+          name: "Проверка шкалы",
+          password: credentials.player,
+        },
+      })
+    ).ok(),
+  ).toBe(true);
+  const a = await pageFor(browser, await p.storageState());
+  await p.dispose();
+  await h.getByRole("button", { name: "Игра", exact: true }).click();
+  await h.getByRole("button", { name: "Начать игру", exact: true }).click();
+  await h.getByRole("button", { name: "Начать раунд", exact: true }).click();
+  await h.locator(".v2-board button").first().click();
+  const slider = a.getByRole("slider", { name: "Точная отметка", exact: true });
+  await expect(slider).toBeVisible();
+  const label = (await slider.locator(".circle-value").boundingBox())!;
+  const box = (await slider.boundingBox())!;
+  await a.mouse.move(label.x + label.width / 2, label.y + label.height / 2);
+  await a.mouse.down();
+  await a.mouse.move(box.x + box.width * 0.9, box.y + box.height / 2, {
+    steps: 12,
+  });
+  expect(Number(await slider.getAttribute("aria-valuenow"))).toBeGreaterThan(
+    200,
+  );
+  await a.mouse.move(box.x + box.width / 2, box.y - 40, { steps: 12 });
+  await a.mouse.up();
+  expect(await a.evaluate(() => getSelection()?.toString() ?? "")).toBe("");
+  await expect(slider).toBeFocused();
+  await slider.press("Home");
+  await slider.press("ArrowRight");
+  await expect(slider).toHaveAttribute("aria-valuenow", "1");
+  await a.getByLabel("Числовой ответ", { exact: true }).fill("144");
+  await a.getByRole("button", { name: "Подтвердить", exact: true }).click();
+  await expect(h.locator("#main")).toHaveAttribute("data-phase", "comparison");
+  await h.getByRole("button", { name: "Показать ответ", exact: true }).click();
+  await expect(h.locator(".game-dialog-overlay")).toHaveCount(0);
+  await expect(a.locator(".comparison-actions")).toContainText(
+    "Засчитывается: 145–155 видов",
+  );
+  await expect(a.locator(".personal-result")).toContainText(
+    "Вы ответили неверно",
+  );
+  await expect(a.locator(".frame.me .sc")).toHaveText("0");
+  await a.screenshot({
+    path: "test-results/scale-published-range.png",
+    fullPage: true,
+  });
 });
 
 for (const count of [2, 6])
@@ -452,6 +598,48 @@ for (const count of [2, 6])
           await wait(() => view.phase !== "choosing");
           if (round === 1) {
             const active = byId.get(view.activePlayerId!)!;
+            if (n < 2 && q.round === 1) {
+              const slider = active.getByRole("slider", {
+                name: "Точная отметка",
+                exact: true,
+              });
+              await slider.scrollIntoViewIfNeeded();
+              const label = (await slider
+                .locator(".circle-value")
+                .boundingBox())!;
+              const box = (await slider.boundingBox())!;
+              await active.mouse.move(
+                label.x + label.width / 2,
+                label.y + label.height / 2,
+              );
+              await active.mouse.down();
+              await active.mouse.move(
+                box.x + box.width * 0.9,
+                box.y + box.height * 0.5,
+                { steps: 12 },
+              );
+              await expect(slider).toBeFocused();
+              expect(
+                Number(await slider.getAttribute("aria-valuenow")),
+              ).toBeGreaterThan((q.min + q.max) / 2);
+              await active.mouse.move(box.x + box.width / 2, box.y - 40, {
+                steps: 12,
+              });
+              await active.mouse.up();
+              expect(
+                await active.evaluate(() => getSelection()?.toString() ?? ""),
+              ).toBe("");
+              await slider.press("Home");
+              await expect(slider).toHaveAttribute(
+                "aria-valuenow",
+                String(q.min),
+              );
+              await slider.press("ArrowRight");
+              await expect(slider).toHaveAttribute(
+                "aria-valuenow",
+                String(q.min + 1),
+              );
+            }
             await active
               .getByLabel("Числовой ответ", { exact: true })
               .fill(String(q.answer));
@@ -479,7 +667,7 @@ for (const count of [2, 6])
               }
           } else if (round === 2 || round === 3) {
             if (round === 2)
-              await expect(h.locator(".anchor-event b")).toHaveText("");
+              await expect(h.locator(".anchor-event b")).toHaveCount(0);
             for (const page of players) {
               await page
                 .locator(".choice-buttons button")
@@ -515,6 +703,62 @@ for (const count of [2, 6])
               );
               await wait(() => view.phase === "judging");
               expect(view.buzzes.filter((b) => b.accepted)).toHaveLength(1);
+              const answerControls = h.getByRole("group", {
+                name: "Ответы ведущего",
+              });
+              await expect(answerControls.getByRole("button")).toHaveCount(3);
+              const controlsBox = (await answerControls.boundingBox())!;
+              const cameraBox = (await h
+                .locator("#hostframe .frame.host")
+                .boundingBox())!;
+              const stageBox = (await h.locator("#main").boundingBox())!;
+              expect(controlsBox.y).toBeGreaterThanOrEqual(
+                stageBox.y + stageBox.height,
+              );
+              expect(controlsBox.x + controlsBox.width).toBeLessThanOrEqual(
+                cameraBox.x,
+              );
+              expect(
+                Math.abs(
+                  cameraBox.x +
+                    cameraBox.width / 2 -
+                    stageBox.x -
+                    stageBox.width / 2,
+                ),
+              ).toBeLessThan(1);
+              await h.screenshot({
+                path: `test-results/host-answers-round-${round}.png`,
+              });
+              await h
+                .getByRole("button", { name: "Чистый экран", exact: true })
+                .click();
+              await expect(answerControls).toHaveCount(0);
+              await h.locator(".game-toolbar").hover();
+              await h
+                .getByRole("button", { name: "Вернуть панель", exact: true })
+                .click();
+              await h.setViewportSize({ width: 390, height: 844 });
+              for (const label of ["Верно", "Неверно", "Показать ответ"])
+                await expect(
+                  answerControls.getByRole("button", {
+                    name: label,
+                    exact: true,
+                  }),
+                ).toBeVisible();
+              expect(
+                await h.evaluate(
+                  () => document.documentElement.scrollWidth <= innerWidth,
+                ),
+              ).toBe(true);
+              await h.screenshot({
+                path: `test-results/host-answers-mobile-round-${round}.png`,
+                fullPage: true,
+              });
+              await h.setViewportSize({ width: 1920, height: 1080 });
+              for (const page of [...players, obs])
+                await expect(page.locator(".host-answer-controls")).toHaveCount(
+                  0,
+                );
               const wrong = view.buzzWinner!;
               await h
                 .getByRole("button", { name: "Неверно", exact: true })
@@ -734,6 +978,21 @@ for (const count of [2, 6])
         "data-longitude",
         chosenLongitude,
       );
+      const labelsFit = await h
+        .locator(".final-results .map-svg")
+        .evaluate((svg) => {
+          const area = svg.getBoundingClientRect();
+          return [...svg.querySelectorAll(".map-pin-label")].every((label) => {
+            const box = label.getBoundingClientRect();
+            return (
+              box.left >= area.left &&
+              box.right <= area.right &&
+              box.top >= area.top &&
+              box.bottom <= area.bottom
+            );
+          });
+        });
+      expect(labelsFit).toBe(true);
       await h.screenshot({
         path: "test-results/v2-" + count + "-final.png",
         fullPage: true,
@@ -823,6 +1082,366 @@ test("редактор v2: серверный черновик, отдельны
   expect(data.drafts.some((d) => d.id === q.id)).toBe(false);
   if (q.round !== 4) throw Error("Неверный тип вопроса");
   expect(q.media.fileId).not.toBe(q.fullImageFileId);
+});
+
+test("старт с нулём и одним игроком, чистый журнал каждой партии", async ({
+  browser,
+}) => {
+  const credentials = JSON.parse(
+    readFileSync(".local/e2e/credentials.json", "utf8"),
+  );
+  const h = await pageFor(browser, await api.storageState(), true);
+  expect(
+    (await api.post("/api/editor/packages/demo-v2-51/use", { data: {} })).ok(),
+  ).toBe(true);
+  await wait(() => view.selectedPackage?.id === "demo-v2-51");
+  const startButton = h.getByRole("button", {
+    name: "Начать игру",
+    exact: true,
+  });
+  await expect(h.locator(".lobby-sub")).not.toContainText("минимум");
+  await expect(startButton).toBeEnabled();
+  await startButton.click();
+  await expect(h.locator("#main")).toHaveAttribute("data-phase", "intro");
+  expect(view.players).toEqual([]);
+  expect(view.events).toEqual([]);
+  await send("begin");
+  await send("choose", view.board[0].id);
+  await expect(h.locator("#main")).toHaveAttribute(
+    "data-phase",
+    "awaitingReveal",
+  );
+  await send("reveal", "ЗАВЕРШИТЬ ОЖИДАНИЕ");
+  await expect(h.locator("#main")).toHaveAttribute("data-phase", "reveal");
+  await send("endGame", "ЗАВЕРШИТЬ ИГРУ");
+  const playerApi = await request.newContext({ baseURL: base });
+  expect(
+    (
+      await playerApi.post("/api/login", {
+        data: {
+          role: "player",
+          name: "Один игрок",
+          password: credentials.player,
+        },
+      })
+    ).ok(),
+  ).toBe(true);
+  const player = await pageFor(
+    browser,
+    await playerApi.storageState(),
+    false,
+    true,
+  );
+  await playerApi.dispose();
+  await wait(() => view.players.length === 1);
+  expect(view.players[0].ready).toBe(false);
+  const score = async (amount: number) =>
+    send("score", {
+      playerId: view.players[0].id,
+      amount,
+      reason: "Проверка нового журнала",
+    });
+  await score(1000);
+  await expect(h.locator(".log-row")).toHaveCount(1);
+  await expect(startButton).toBeEnabled();
+  await startButton.click();
+  await expect(h.locator("#main")).toHaveAttribute("data-phase", "intro");
+  await expect(player.locator("#main")).toHaveAttribute("data-phase", "intro");
+  await expect(h.locator(".log-row")).toHaveCount(0);
+  await score(1000);
+  await score(-1700);
+  await expect(h.locator(".log-row")).toHaveCount(2);
+  await h
+    .getByRole("button", {
+      name: "Начать игру заново тем же составом",
+      exact: true,
+    })
+    .click();
+  await h
+    .locator(".game-dialog-overlay")
+    .getByRole("button", { name: "Подтвердить", exact: true })
+    .click();
+  await expect(h.locator(".log-row")).toHaveCount(0);
+  expect(view.players[0].score).toBe(0);
+  await h.reload();
+  await expect(h.locator("#main")).toHaveAttribute("data-phase", "intro");
+  await expect(h.locator(".log-row")).toHaveCount(0);
+  await score(25);
+  await expect(h.locator(".log-row")).toHaveText(["Один игрок: +25 очков"]);
+  await send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
+  await expect(h.locator(".log-row")).toHaveText(["Один игрок: +25 очков"]);
+  await send("endGame", "ЗАВЕРШИТЬ ИГРУ");
+  await expect(h.locator("#main")).toHaveAttribute("data-phase", "lobby");
+  await expect(h.locator(".log-row")).toHaveCount(0);
+  await expect(startButton).toBeEnabled();
+  await h.screenshot({
+    path: "test-results/empty-lobby-clean-log.png",
+    fullPage: true,
+  });
+});
+
+test("завершить игру: пустое лобби, отключение игроков и новый вход теми же именами", async ({
+  browser,
+}) => {
+  const credentials = JSON.parse(
+    readFileSync(".local/e2e/credentials.json", "utf8"),
+  );
+  const h = await pageFor(browser, await api.storageState(), true);
+  const finish = h.getByRole("button", { name: "Завершить игру", exact: true });
+  await expect(finish).toBeDisabled();
+  const players: Page[] = [];
+  const names = ["Повторный вход А", "Повторный вход Б"];
+  for (const [index, name] of names.entries()) {
+    const playerApi = await request.newContext({ baseURL: base });
+    expect(
+      (
+        await playerApi.post("/api/login", {
+          data: { role: "player", name, password: credentials.player },
+        })
+      ).ok(),
+    ).toBe(true);
+    players.push(
+      await pageFor(
+        browser,
+        await playerApi.storageState(),
+        false,
+        index === 1,
+      ),
+    );
+    await playerApi.dispose();
+  }
+  await wait(() => view.players.length === 2);
+  const oldIds = view.players.map((p) => p.id);
+  expect(
+    (await api.post("/api/editor/packages/demo-v2-51/use", { data: {} })).ok(),
+  ).toBe(true);
+  await wait(() => view.selectedPackage?.id === "demo-v2-51");
+  await send("start");
+  await send("score", {
+    playerId: oldIds[0],
+    amount: 777,
+    reason: "Перед завершением",
+  });
+  await send("pause");
+  for (const page of players)
+    await expect(
+      page.getByRole("button", { name: "Завершить игру", exact: true }),
+    ).toHaveCount(0);
+  await finish.click();
+  const dialog = h.getByRole("dialog", {
+    name: "Завершить игру?",
+    exact: true,
+  });
+  await expect(dialog).toContainText("Все игроки будут отключены");
+  await dialog.getByRole("button", { name: "Отмена", exact: true }).click();
+  expect(view.players.map((p) => p.id)).toEqual(oldIds);
+  expect(view.players[0].score).toBe(777);
+  expect(view.phase).toBe("intro");
+  await players[1].context().setOffline(true);
+  await wait(() => !view.players.find((p) => p.id === oldIds[1])?.connected);
+  await finish.click();
+  await dialog
+    .getByRole("button", { name: "Завершить игру", exact: true })
+    .click();
+  await expect(h.locator("#main")).toHaveAttribute("data-phase", "lobby");
+  expect(view.players).toEqual([]);
+  expect(view.joinOpen).toBe(true);
+  await expect(
+    players[0].getByRole("form", { name: "Вход игрока" }),
+  ).toBeVisible();
+  await players[1].context().setOffline(false);
+  await expect(
+    players[1].getByRole("form", { name: "Вход игрока" }),
+  ).toBeVisible({ timeout: 15000 });
+  await h.reload();
+  await expect(h.locator("#main")).toHaveAttribute("data-phase", "lobby");
+  await expect(finish).toBeDisabled();
+  await h.screenshot({
+    path: "test-results/end-game-host-lobby.png",
+    fullPage: true,
+  });
+  await players[1].screenshot({
+    path: "test-results/end-game-player-login.png",
+    fullPage: true,
+  });
+  for (const [index, page] of players.entries()) {
+    await page.reload();
+    await page.getByLabel("Имя", { exact: true }).fill(names[index]);
+    await page.getByLabel("Пароль", { exact: true }).fill(credentials.player);
+    await page.getByRole("button", { name: "Войти", exact: true }).click();
+    await expect(page.locator("#main")).toHaveAttribute("data-phase", "lobby");
+  }
+  await wait(() => view.players.length === 2);
+  expect(view.players.map((p) => p.score)).toEqual([0, 0]);
+  expect(view.players.every((p) => !oldIds.includes(p.id))).toBe(true);
+  await h.getByRole("button", { name: "Начать игру", exact: true }).click();
+  for (const page of [h, ...players])
+    await expect(page.locator("#main")).toHaveAttribute("data-phase", "intro");
+});
+
+test("финал: пауза не мешает игрокам, ведущий заменяет остаток таймера", async ({
+  browser,
+}) => {
+  const credentials = JSON.parse(
+    readFileSync(".local/e2e/credentials.json", "utf8"),
+  );
+  const h = await pageFor(browser, await api.storageState(), true);
+  const players: Page[] = [];
+  for (const [index, name] of ["Пауза компьютер", "Пауза телефон"].entries()) {
+    const apiPlayer = await request.newContext({ baseURL: base });
+    expect(
+      (
+        await apiPlayer.post("/api/login", {
+          data: { role: "player", name, password: credentials.player },
+        })
+      ).ok(),
+    ).toBe(true);
+    players.push(
+      await pageFor(
+        browser,
+        await apiPlayer.storageState(),
+        false,
+        index === 1,
+      ),
+    );
+    await apiPlayer.dispose();
+  }
+  expect(
+    (await api.post("/api/editor/packages/demo-v2-51/use", { data: {} })).ok(),
+  ).toBe(true);
+  await wait(() => view.selectedPackage?.id === "demo-v2-51");
+  await send("selectFinal", "demo-v2-geography");
+  await send("start");
+  for (let round = 1; round < 6; round++)
+    await send("nextRound", "СЛЕДУЮЩИЙ РАУНД");
+  await send("begin");
+  await h.getByRole("button", { name: "Пауза", exact: true }).click();
+  await wait(() => view.paused);
+  for (const player of players) {
+    await player.getByLabel("Ставка", { exact: true }).fill("0");
+    await player
+      .getByRole("button", { name: "Подтвердить ставку", exact: true })
+      .click();
+  }
+  await wait(() => view.phase === "locating");
+  expect(view.paused).toBe(true);
+  expect(view.timer).toEqual({ deadline: null, remaining: 60000 });
+  for (const page of [h, ...players])
+    await expect(page.getByRole("timer")).toContainText("1:00");
+  const [a, b] = players;
+  const panorama = a.getByLabel("Панорама 360 градусов", { exact: true });
+  await expect(panorama).toHaveAttribute("aria-busy", "false");
+  const heading = await panorama.getAttribute("data-heading");
+  await panorama.focus();
+  await a.keyboard.press("ArrowRight");
+  await expect(panorama).not.toHaveAttribute("data-heading", heading!);
+
+  async function editTimer(seconds: string) {
+    await h
+      .getByRole("button", { name: "Изменить таймер", exact: true })
+      .click();
+    const dialog = h.getByRole("dialog", {
+      name: "Изменить таймер",
+      exact: true,
+    });
+    const input = dialog.getByRole("spinbutton", {
+      name: "Оставшееся время, секунды",
+    });
+    await expect(input).not.toHaveAttribute("max");
+    await input.fill(seconds);
+    await dialog
+      .getByRole("button", { name: "Установить время", exact: true })
+      .click();
+    await expect(dialog).not.toBeVisible();
+  }
+  await editTimer("20");
+  await wait(() => view.timer.remaining === 20000);
+  await h.getByRole("button", { name: "Изменить таймер", exact: true }).click();
+  const dialog = h.getByRole("dialog", {
+    name: "Изменить таймер",
+    exact: true,
+  });
+  await expect(dialog.getByRole("spinbutton")).toHaveValue("20");
+  await dialog.getByRole("spinbutton").fill("40");
+  await dialog
+    .getByRole("button", { name: "Установить время", exact: true })
+    .click();
+  await wait(() => view.timer.remaining === 40000);
+  for (const page of [h, ...players])
+    await expect(page.getByRole("timer")).toContainText("0:40");
+
+  await a.getByRole("button", { name: "Выбрать страну", exact: true }).click();
+  await clickCountry(a, "ZA", 25, -30);
+  await expect(
+    a.getByRole("button", { name: "Подтвердить страну", exact: true }),
+  ).toBeEnabled();
+  await a
+    .getByRole("button", { name: "Подтвердить страну", exact: true })
+    .click();
+  await expect(a.locator(".answer-status")).toContainText(
+    "Страна подтверждена",
+  );
+  expect(view.countries).toEqual({});
+  expect(view.timer).toEqual({ deadline: null, remaining: 40000 });
+
+  await b.getByRole("button", { name: "Выбрать страну", exact: true }).click();
+  await b
+    .getByRole("button", { name: "Открыть карту на весь экран", exact: true })
+    .click();
+  const full = b.getByRole("dialog", {
+    name: "Карта на весь экран",
+    exact: true,
+  });
+  await expect(
+    full.getByText("Таймер на паузе. Можно выбирать и подтверждать страну."),
+  ).toBeVisible();
+  await full.locator('[data-country="RU"]').press("Enter");
+  await expect(full.locator('[data-country="RU"]')).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(
+    full.getByRole("button", { name: "Подтвердить страну", exact: true }),
+  ).toBeEnabled();
+  await b.screenshot({ path: "test-results/final-paused-mobile-map.png" });
+  const pauseBox = await full.locator(".map-pause-status").boundingBox();
+  const mapBox = await full.locator(".map-viewport").boundingBox();
+  const actionBox = await full.locator(".map-dialog-actions").boundingBox();
+  expect(pauseBox!.y).toBeGreaterThanOrEqual(mapBox!.y + mapBox!.height);
+  expect(actionBox!.y).toBeGreaterThanOrEqual(pauseBox!.y + pauseBox!.height);
+
+  await h.getByRole("button", { name: "Продолжить", exact: true }).click();
+  await wait(() => !view.paused && view.timer.deadline !== null);
+  expect(view.timer.deadline! - view.serverNow).toBeLessThanOrEqual(40000);
+  expect(view.timer.deadline! - view.serverNow).toBeGreaterThan(37000);
+  await editTimer("125");
+  await wait(() => view.timer.deadline! - view.serverNow > 120000);
+  for (const page of [h, a]) {
+    await expect
+      .poll(async () =>
+        (await page.getByRole("timer").innerText())
+          .split(":")
+          .reduce((seconds, part) => seconds * 60 + Number(part), 0),
+      )
+      .toBeGreaterThan(120);
+  }
+  await h.getByRole("button", { name: "Пауза", exact: true }).click();
+  await wait(() => view.paused);
+  await h.screenshot({
+    path: "test-results/final-host-timer.png",
+    fullPage: true,
+  });
+  await full
+    .getByRole("button", { name: "Подтвердить страну", exact: true })
+    .click();
+  await wait(() => view.phase === "awaitingReveal");
+  expect(view.question?.answer).toBeUndefined();
+  expect(view.countries).toEqual({});
+  expect(view.timer).toEqual({ deadline: null, remaining: null });
+  await expect(h.locator(".final-results")).toHaveCount(0);
+  await h.getByRole("button", { name: "Продолжить", exact: true }).click();
+  await h.getByRole("button", { name: "Показать ответы", exact: true }).click();
+  await wait(() => view.phase === "finished");
 });
 
 test("карта: весь экран, масштаб, жесты и ставка всем счётом", async ({
@@ -945,6 +1564,35 @@ test("карта: весь экран, масштаб, жесты и ставк�
     .getByRole("button", { name: "Сбросить масштаб", exact: true })
     .click();
   await expect(map).toHaveAttribute("data-zoom", "1");
+  for (const [code, longitude, latitude] of [
+    ["RU", 35.1396, 47.8388], // Zaporizhzhia
+    ["RU", 37.8028, 48.0159], // Donetsk
+    ["RU", 39.3078, 48.574], // Luhansk
+    ["RU", 32.6169, 46.6558], // Kherson
+    ["RU", 34.1024, 44.9521], // Crimea
+    ["UA", 30.5234, 50.4501], // Kyiv remains selectable as UA
+  ] as const) {
+    await clickCountry(a, code, longitude, latitude);
+    await expect(a.locator(`[data-country="${code}"]`)).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  }
+  const focus = await clickCountry(a, "UA", 30.5234, 50.4501);
+  await a.mouse.move(focus.x, focus.y);
+  await a.mouse.wheel(0, -750);
+  await expect
+    .poll(async () => Number(await map.getAttribute("data-zoom")))
+    .toBeGreaterThan(2);
+  await a.mouse.wheel(0, -600);
+  await expect
+    .poll(async () => Number(await map.getAttribute("data-zoom")))
+    .toBeGreaterThan(5);
+  await a.screenshot({ path: "test-results/map-host-region-scheme.png" });
+  await a
+    .getByRole("button", { name: "Сбросить масштаб", exact: true })
+    .click();
+  await clickCountry(a, "ZA", 25, -30);
   await a
     .getByRole("button", { name: "Открыть карту на весь экран", exact: true })
     .click();
@@ -963,6 +1611,9 @@ test("карта: весь экран, масштаб, жесты и ставк�
     exact: true,
   });
   const mobileMap = mobileFull.locator(".map-svg");
+  await expect(
+    mobileFull.locator("input, .country-search-results"),
+  ).toHaveCount(0);
   await expect(mobileMap).toBeVisible();
   const mobileBox = (await mobileMap.boundingBox())!;
   const touch = await b.context().newCDPSession(b);
@@ -1011,6 +1662,23 @@ test("карта: весь экран, масштаб, жесты и ставк�
   await send("reveal");
   await wait(() => view.phase === "finished");
   expect(view.players.map((p) => p.score)).toEqual([2200, 0]);
+  const resultHint =
+    "Салатовый — правильная страна. Имена и цвета — ответы игроков.";
+  await expect(h.getByText(resultHint, { exact: true })).toBeVisible();
+  for (const player of [a, b]) {
+    await expect(player.locator(".final-results")).toBeVisible();
+    await expect(player.getByText(resultHint, { exact: true })).toHaveCount(0);
+  }
+  await b
+    .getByRole("button", { name: "Открыть карту на весь экран", exact: true })
+    .click();
+  await expect(
+    b.getByRole("dialog", { name: "Карта на весь экран", exact: true }),
+  ).toBeVisible();
+  await expect(b.getByText(resultHint, { exact: true })).toHaveCount(0);
+  await b
+    .getByRole("button", { name: "Закрыть полноэкранную карту", exact: true })
+    .click();
   await expect(h.locator(".final-results .map-svg [role=button]")).toHaveCount(
     0,
   );
@@ -1042,6 +1710,18 @@ test("карта: весь экран, масштаб, жесты и ставк�
     .click();
   await expect(result).toHaveCount(0);
   await expect(h.locator(".podium")).toBeVisible();
+  await expect(
+    h.locator(".final-results [data-pin] text").first(),
+  ).toBeVisible();
+  const labelPixels = await h
+    .locator(".final-results [data-pin] text")
+    .first()
+    .evaluate((text) => {
+      const matrix = (text as SVGTextElement).getScreenCTM()!;
+      return Number(text.getAttribute("font-size")) * Math.abs(matrix.a);
+    });
+  expect(labelPixels).toBeGreaterThanOrEqual(17.5);
+  expect(labelPixels).toBeLessThanOrEqual(18.5);
   await h.screenshot({ path: "test-results/map-result-controls.png" });
 });
 

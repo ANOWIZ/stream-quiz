@@ -98,11 +98,11 @@ it("ставка при отрицательном счёте только ну�
   ).toThrow();
   applyCommand(s, who(a.id), { type: "bet", value: 0 }, [], 1);
   applyCommand(s, who(b.id), { type: "bet", value: 50 }, [], 2);
-  expect(() =>
-    applyCommand(s, host, { type: "timer", value: 120 }, [], 10000),
-  ).toThrow("сократить");
-  expire(s, 120003);
-  applyCommand(s, host, { type: "reveal" }, [], 120004);
+  applyCommand(s, host, { type: "timer", value: 120 }, [], 10000);
+  expect(s.timer.deadline).toBe(130000);
+  expect(expire(s, 120003)).toBe(false);
+  expire(s, 130000);
+  applyCommand(s, host, { type: "reveal" }, [], 130001);
   expect(a.score).toBe(-50);
   expect(b.score).toBe(50);
   expect(s.countries[b.id].code).toBeNull();

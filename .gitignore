@@ -1,21 +1,15 @@
 node_modules/
-.next/
 dist/
 .env
 .env.*
 !.env.example
-*.tsbuildinfo
+data/
+uploads/
+backups/
+test-results/
+playwright-report/
 *.log
 *.db
 *.db-*
-*.sqlite*
 .local/
-.tmp/
-backups/
-data/
-uploads/
-playwright-report/
-test-results/
-next-env.d.ts
-server-assets/
-references/
+картинки для квиза/

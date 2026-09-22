@@ -8,7 +8,10 @@ export function numericKind(q: {
   return q.numericKind ?? (q.unit?.trim() === "%" ? "percent" : "number");
 }
 export function comparisonResult(
-  q: Pick<Extract<Question, { round: 1 }>, "answer" | "numericKind" | "unit">,
+  q: Pick<
+    Extract<Question, { round: 1 }>,
+    "answer" | "numericKind" | "unit" | "acceptedMin" | "acceptedMax"
+  >,
   guess: number,
   config: Config,
 ) {
@@ -21,13 +24,15 @@ export function comparisonResult(
     tolerance === 0
       ? 0
       : Number.EPSILON * Math.max(1, Math.abs(q.answer), Math.abs(guess)) * 8;
-  const correct = deviation <= tolerance + epsilon;
+  const lower = q.acceptedMin ?? q.answer - tolerance;
+  const upper = q.acceptedMax ?? q.answer + tolerance;
+  const correct = guess >= lower - epsilon && guess <= upper + epsilon;
   const choice: ComparisonChoice = correct
     ? "equal"
     : q.answer > guess
       ? "higher"
       : "lower";
-  return { tolerance, deviation, correct, choice };
+  return { tolerance, deviation, correct, choice, lower, upper };
 }
 export const comparisonLabels: Record<ComparisonChoice, string> = {
   higher: "Больше",

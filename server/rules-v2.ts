@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
+import { FINAL_ANSWER_SECONDS } from "../shared/config.js";
 import { finishCountrySelection } from "./final.js";
 import type { Command, GameState, Identity } from "../shared/types.js";
 import { locationSchema, type Question } from "../shared/content.js";
@@ -11,6 +12,7 @@ import {
   arm,
   clearQuestion,
   requireRule,
+  canAnswerDuringPause,
   reveal,
   shuffled,
   stopTimer,
@@ -64,8 +66,8 @@ export function beginV2(s: GameState, q: Question, now: number) {
     changedAt: now,
   };
   if (q.round === 1) {
-    s.phase = "point";
     const active = activeId(s);
+    s.phase = active ? "point" : "awaitingReveal";
     if (active)
       s.answers[active] = {
         value: Math.round((q.min + q.max) / 2),
@@ -135,16 +137,17 @@ function loadPanorama(s: GameState) {
 function maybeStartPanorama(s: GameState, now: number): boolean {
   if (
     s.phase !== "loadingPanorama" ||
-    s.paused ||
     !s.panoramaReady.host ||
     !s.roster.every(
       (id) => s.panoramaReady[id] || s.panoramaExcluded.includes(id),
     )
   )
     return false;
-  const remaining = s.timer.remaining ?? 60000;
+  const remaining = s.timer.remaining ?? FINAL_ANSWER_SECONDS * 1000;
   s.phase = "locating";
-  s.timer = { deadline: now + remaining, remaining: null };
+  s.timer = s.paused
+    ? { deadline: null, remaining }
+    : { deadline: now + remaining, remaining: null };
   return true;
 }
 export function expireV2(s: GameState, now: number): boolean {
@@ -254,15 +257,15 @@ export function commandV2(
     };
     return "Числовой ход передан следующему участнику";
   }
-  requireRule(!s.paused, "Игра на паузе");
+  requireRule(!s.paused || canAnswerDuringPause(s, who, c), "Игра на паузе");
   if (c.type === "start") {
     requireRule(
       host && s.phase === "lobby",
       "Игра уже началась или нет прав ведущего",
     );
     requireRule(
-      s.players.length >= 2 && s.players.length <= 6,
-      "Для новых правил нужны 2–6 игроков",
+      s.players.length <= s.config.maxPlayers,
+      "Превышено максимальное количество игроков",
     );
     requireRule(
       s.packageSnapshot,
@@ -429,6 +432,10 @@ export function commandV2(
       buzzes: structuredClone(s.buzzes),
     };
     addPoints(s, s.buzzWinner, delta);
+    s.answers[s.buzzWinner] = {
+      choice: correct ? "correct" : "wrong",
+      locked: true,
+    };
     if (correct) reveal(s);
     else {
       s.blocked.push(s.buzzWinner);
@@ -450,6 +457,7 @@ export function commandV2(
       "Нет решения для отмены",
     );
     addPoints(s, d.playerId, -d.delta);
+    delete s.answers[d.playerId];
     s.blocked = [...d.blocked];
     s.used = [...d.used];
     s.buzzWinner = d.playerId;
@@ -582,10 +590,6 @@ export function commandV2(
     s.turn = index;
     return "Ведущий назначил активного игрока";
   }
-  if (c.type === "timer")
-    throw Error(
-      "В новых правилах таймеры фиксированы: память 30 секунд, финал 60 секунд",
-    );
   if (c.type === "skip") s.lastDecision = null;
   // Existing explicit reset/skip/final-cancellation and host utilities remain shared.
   if (["skip", "cancelFinal"].includes(c.type)) return null;

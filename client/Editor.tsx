@@ -41,6 +41,8 @@ export type HostMode =
 type Draft = {
   formatVersion?: 2;
   numericKind?: "number" | "percent";
+  acceptedMin?: string;
+  acceptedMax?: string;
   speaker?: string;
   work?: string;
   translated?: boolean;
@@ -133,6 +135,10 @@ function fromQuestion(q: Question): Draft {
     d.optionA = q.options[0];
     d.optionB = q.options[1];
   }
+  if (q.round === 1) {
+    d.acceptedMin = q.acceptedMin?.toString() ?? "";
+    d.acceptedMax = q.acceptedMax?.toString() ?? "";
+  }
   if (q.round === 5) d.studySeconds = q.studySeconds?.toString() ?? "";
   if (q.media) {
     d.mediaKind = q.media.kind;
@@ -165,6 +171,8 @@ function questionFromDraft(d: Draft): Question {
   return questionSchema.parse({
     ...d,
     answer: d.round === 1 ? Number(d.answer) : d.answer,
+    acceptedMin: d.acceptedMin?.trim() ? Number(d.acceptedMin) : undefined,
+    acceptedMax: d.acceptedMax?.trim() ? Number(d.acceptedMax) : undefined,
     anchorDate: /^-?\d+$/.test(String(d.anchorDate))
       ? Number(d.anchorDate)
       : d.anchorDate,
@@ -332,7 +340,13 @@ export function Editor({
           change(
             key,
             type === "number" &&
-              !["answer", "studySeconds", "end"].includes(key)
+              ![
+                "answer",
+                "studySeconds",
+                "end",
+                "acceptedMin",
+                "acceptedMax",
+              ].includes(key)
               ? Number(e.target.value)
               : e.target.value,
           )
@@ -893,9 +907,6 @@ export function Editor({
               {draft.round === 2 && (
                 <div className="anchor-event">
                   <strong>{draft.anchorText}</strong>
-                  {data.config.rulesVersion !== 2 && (
-                    <b>{formatEventDate(draft.anchorDate)}</b>
-                  )}
                 </div>
               )}
               {draft.round === 3 && (
@@ -1029,6 +1040,16 @@ export function Editor({
                         "Правильное числовое значение",
                         "number",
                       )}
+                      <div className="field-pair">
+                        {input("acceptedMin", "Засчитывать от", "number")}
+                        {input("acceptedMax", "Засчитывать до", "number")}
+                      </div>
+                      <p className="muted">
+                        Обе границы включены. Например, ответ 194: от 190 до
+                        198. Вне указанного диапазона числовой ответ даёт 0
+                        очков. Оставьте оба поля пустыми для допуска из настроек
+                        раунда.
+                      </p>
                     </>
                   )}
                   {draft.round === 2 && (

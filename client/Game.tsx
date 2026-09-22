@@ -3,14 +3,17 @@ import { Comparison } from "./Comparison.js";
 import { api } from "./api.js";
 import { useSounds, unlockSound } from "./sound.js";
 import { Media } from "./Media.js";
+import { QuestionImage } from "./QuestionImage.js";
 import { Final } from "./Final.js";
 import { Buzzer } from "./Buzzer.js";
 import { Choice } from "./Choice.js";
 import { Numeric } from "./Numeric.js";
-import { useState, useEffect } from "react";
+import { roundScoringDescription } from "../shared/round-description.js";
+import { useState, useEffect, useRef } from "react";
 import {
   Settings2,
   ChevronRight,
+  ChevronLeft,
   Maximize,
   Timer,
   Pause,
@@ -28,9 +31,11 @@ export function Game({
 }: {
   view: GameView;
   navigation?: ReactNode;
-  act: (type: string, value?: unknown) => void;
+  act: (type: string, value?: unknown) => void | Promise<void>;
 }) {
   const { showMessage, confirmAction, requestValue } = useDialogs();
+  const latestView = useRef(v);
+  latestView.current = v;
   const [panel, setPanel] = useState(false);
   const [clean, setClean] = useState(false);
   const [now, setNow] = useState(Date.now());
@@ -63,6 +68,19 @@ export function Game({
   const canChoose = !obs && (isHost || me?.id === v.activePlayerId);
   const revealed = ["reveal", "finished"].includes(v.phase);
   const categories = [...new Set(v.board.map((q) => q.category))];
+  const canJudge = [4, 5].includes(v.round) && v.phase === "judging";
+  const canReveal =
+    [
+      "comparison",
+      "point",
+      "ranges",
+      "answering",
+      "awaitingReveal",
+      "buzzing",
+      "judging",
+      "locating",
+    ].includes(v.phase) &&
+    (v.round !== 6 || v.phase === "awaitingReveal");
   return (
     <div
       id="app"
@@ -79,8 +97,31 @@ export function Game({
             <span className="round-label rnd">
               {v.round ? String(v.round).padStart(2, "0") + " / 06" : "ЛОББИ"}
               <b>{v.config.roundNames[v.round] ?? "Перед эфиром"}</b>
+              {v.round > 0 && (
+                <small className="round-scoring">
+                  {roundScoringDescription(v)}
+                </small>
+              )}
             </span>
             <div className="toolbar-actions top-right">
+              {me && !obs && (
+                <button
+                  onClick={async () => {
+                    const name = await requestValue(
+                      "Введите новое имя (до 30 символов).",
+                      me.name,
+                      {
+                        title: "Изменить имя",
+                        inputLabel: "Новое имя",
+                        confirmLabel: "Сохранить имя",
+                      },
+                    );
+                    if (name !== null) act("rename", name);
+                  }}
+                >
+                  Изменить имя
+                </button>
+              )}
               {!v.joinOpen && <span className="lock-ind">🔒 вход закрыт</span>}
               {!obs && (
                 <button
@@ -138,15 +179,18 @@ export function Game({
                   role="timer"
                 >
                   <Timer size={20} />
-                  {v.paused
-                    ? "ПАУЗА"
-                    : Math.floor(remaining / 60) +
-                      ":" +
-                      String(remaining % 60).padStart(2, "0")}
+                  {v.paused ? "ПАУЗА · " : ""}
+                  {Math.floor(remaining / 60) +
+                    ":" +
+                    String(remaining % 60).padStart(2, "0")}
                 </span>
               )}
             </div>
-            {v.paused && <div className="pause-banner">Эфир на паузе</div>}
+            {v.paused && (
+              <div className="pause-banner">
+                {v.round === 6 ? "Таймер на паузе" : "Эфир на паузе"}
+              </div>
+            )}
             {v.phase === "lobby" ? (
               <div className="lobby-view">
                 <h1 className="lobby-title">Викторина</h1>
@@ -159,11 +203,7 @@ export function Game({
                 </div>
                 <p className="lobby-sub">
                   {v.players.length} / {v.config.maxPlayers} игроков ·{" "}
-                  {isHost
-                    ? v2 && v.players.length < 2
-                      ? "Нужно минимум 2 игрока"
-                      : "Можно начинать игру"
-                    : "Ждём, пока ведущий начнёт"}
+                  {isHost ? "Можно начинать игру" : "Ждём, пока ведущий начнёт"}
                 </p>
                 {isHost && v2 && (
                   <div className="lobby-package">
@@ -279,12 +319,8 @@ export function Game({
                 <h1 className="scene-title">
                   {v.round <= 3 ? "Выберите категорию" : "Откройте вопрос"}
                 </h1>
-                {v2 || v.round === 1 ? (
-                  <div
-                    className={
-                      "board v2-board" + (numberedTiles ? " memory-tiles" : "")
-                    }
-                  >
+                {v2 || v.round <= 3 || v.round === 5 ? (
+                  <div className={"board v2-board"}>
                     {v.board.map((q, index) => (
                       <button
                         className={"cell" + (q.used ? " used" : "")}
@@ -292,18 +328,15 @@ export function Game({
                         disabled={!canChoose || v.paused || q.used}
                         aria-label={
                           (numberedTiles
-                            ? "Плитка " + (index + 1)
+                            ? "Запомни " + (index + 1)
                             : q.category) + (q.used ? ", использован" : "")
                         }
                         onClick={() => act("choose", q.id)}
                       >
-                        {v.round === 1
-                          ? (q.used ? "✓ " : "") + q.category
-                          : q.used
-                            ? "✓"
-                            : numberedTiles
-                              ? index + 1
-                              : q.category}
+                        {(q.used ? "✓ " : "") +
+                          (numberedTiles
+                            ? "Запомни " + (index + 1)
+                            : q.category)}
                       </button>
                     ))}
                   </div>
@@ -395,14 +428,26 @@ export function Game({
                       ? "Сколько поставите?"
                       : v.question?.text}
                 </h1>
-                {v.question?.media && (
-                  <Media
-                    media={v.question.media}
-                    state={v.video}
-                    serverNow={v.serverNow}
-                    receivedAt={v.clientReceivedAt}
-                  />
-                )}
+                {v.question?.media &&
+                  (v.question.media.kind === "image" ? (
+                    <QuestionImage
+                      key={
+                        v.question.id +
+                        v.phase +
+                        (v.question.media.fileId ?? v.question.media.url)
+                      }
+                      media={v.question.media}
+                      expandable={!obs && !clean}
+                      remaining={remaining}
+                    />
+                  ) : (
+                    <Media
+                      media={v.question.media}
+                      state={v.video}
+                      serverNow={v.serverNow}
+                      receivedAt={v.clientReceivedAt}
+                    />
+                  ))}
                 {v.round === 1 &&
                   (v2 ? (
                     <Comparison v={v} act={act} />
@@ -464,6 +509,29 @@ export function Game({
                       )}
                   </div>
                 )}
+                {revealed && me && v.answerResults?.[me.id] && (
+                  <p
+                    className={
+                      "personal-result result-" + v.answerResults[me.id]
+                    }
+                    role="status"
+                  >
+                    <strong>
+                      {
+                        {
+                          correct: "Вы ответили верно",
+                          wrong: "Вы ответили неверно",
+                          partial: "Частичный зачёт",
+                          missing: "Вы не ответили",
+                        }[v.answerResults[me.id]]
+                      }
+                    </strong>
+                    <span>
+                      {(v.deltas[me.id] ?? 0) > 0 ? "+" : ""}
+                      {v.deltas[me.id] ?? 0} очков
+                    </span>
+                  </p>
+                )}
                 {!isHost && !obs && !revealed && (
                   <p className="muted">
                     {v.phase === "studying"
@@ -478,6 +546,37 @@ export function Game({
             )}
           </main>
           <div id="hostframe">
+            {isHost && !clean && v.phase !== "lobby" && (
+              <div
+                className="host-answer-controls ctl-row"
+                role="group"
+                aria-label="Ответы ведущего"
+              >
+                <button
+                  className="btn green"
+                  disabled={!canJudge || v.paused}
+                  onClick={() => act("judge", true)}
+                >
+                  Верно
+                </button>
+                <button
+                  className="btn red"
+                  disabled={!canJudge || v.paused}
+                  onClick={() => act("judge", false)}
+                >
+                  Неверно
+                </button>
+                <button
+                  className="primary"
+                  disabled={!canReveal || v.paused}
+                  onClick={() =>
+                    act("reveal", v2 ? "ЗАВЕРШИТЬ ОЖИДАНИЕ" : undefined)
+                  }
+                >
+                  {v.round === 6 ? "Показать ответы" : "Показать ответ"}
+                </button>
+              </div>
+            )}
             <div className="frame host">
               <div className="cam">камера ведущего</div>
               <div className="strip">
@@ -494,9 +593,6 @@ export function Game({
             <>
               {navigation}
               <div className="ctl-row">
-                {[4, 5].includes(v.round) && v.phase === "judging" && (
-                  <Buzzer v={v} act={act} />
-                )}
                 <div className="panel-controls">
                   {v.phase === "betting" && (
                     <button
@@ -522,8 +618,7 @@ export function Game({
                       className="primary"
                       disabled={
                         v2 &&
-                        (v.players.length < 2 ||
-                          !v.selectedPackage ||
+                        (!v.selectedPackage ||
                           !!v.selectedPackage.issues.length)
                       }
                       onClick={() => act("start")}
@@ -582,52 +677,40 @@ export function Game({
                       Отменить судейское решение
                     </button>
                   )}
-                  {[
-                    "comparison",
-                    "point",
-                    "ranges",
-                    "answering",
-                    "awaitingReveal",
-                    "buzzing",
-                    "judging",
-                    "locating",
-                  ].includes(v.phase) &&
-                    (v.round !== 6 || v.phase === "awaitingReveal") && (
-                      <button
-                        className="primary"
-                        disabled={v.paused}
-                        onClick={async () => {
-                          if (
-                            v.round === 6 ||
-                            !v2 ||
-                            v.phase === "point" ||
-                            (await confirmAction(
-                              "Завершить ожидание? Неподтверждённые ответы получат 0 очков; попытки с кнопкой сохранят начисления.",
-                            ))
-                          )
-                            act(
-                              "reveal",
-                              v2 ? "ЗАВЕРШИТЬ ОЖИДАНИЕ" : undefined,
-                            );
-                        }}
-                      >
-                        {v.round === 6 ? "Показать ответы" : "Показать ответ"}
-                      </button>
-                    )}
                   {!["lobby", "finished"].includes(v.phase) && (
                     <button onClick={() => act(v.paused ? "resume" : "pause")}>
                       {v.paused ? <Play size={16} /> : <Pause size={16} />}{" "}
                       {v.paused ? "Продолжить" : "Пауза"}
                     </button>
                   )}
-                  {!v2 && v.timer.deadline !== null && (
+                  {remaining !== null && (
                     <button
                       onClick={async () => {
                         const sec = await requestValue(
-                          "Новая длительность таймера, секунды",
-                          "30",
+                          "Укажите, сколько секунд должно остаться на таймере.",
+                          String(remaining),
+                          {
+                            title: "Изменить таймер",
+                            inputLabel: "Оставшееся время, секунды",
+                            confirmLabel: "Установить время",
+                            inputType: "number",
+                            min: 0,
+                          },
                         );
-                        if (sec) act("timer", Number(sec));
+                        if (sec === null) return;
+                        const latest = latestView.current;
+                        if (
+                          latest.question?.id !== v.question?.id ||
+                          latest.phase !== v.phase ||
+                          latest.roundEpoch !== v.roundEpoch ||
+                          latest.finalAttemptId !== v.finalAttemptId
+                        ) {
+                          await showMessage(
+                            "Вопрос или фаза изменились. Откройте изменение таймера заново.",
+                          );
+                          return;
+                        }
+                        act("timer", Number(sec));
                       }}
                     >
                       Изменить таймер
@@ -650,6 +733,36 @@ export function Game({
                   )}
                   {v.round > 0 && v.phase !== "lobby" && (
                     <>
+                      {v.roundIndex > 0 && (
+                        <button
+                          disabled={!v.canPreviousRound}
+                          title={
+                            !v.canPreviousRound
+                              ? "В старом сохранении нет начала предыдущего раунда"
+                              : undefined
+                          }
+                          onClick={async () => {
+                            if (
+                              !(await confirmAction(
+                                "Вернуться к началу предыдущего раунда? Ответы и игровые начисления текущего и предыдущего раундов будут отменены. Более ранние очки и ручные поправки сохранятся.",
+                              ))
+                            )
+                              return;
+                            if (
+                              latestView.current.revision !== v.revision ||
+                              latestView.current.roundEpoch !== v.roundEpoch
+                            ) {
+                              await showMessage(
+                                "Игра изменилась. Проверьте экран и подтвердите возврат заново.",
+                              );
+                              return;
+                            }
+                            act("previousRound", "ПРЕДЫДУЩИЙ РАУНД");
+                          }}
+                        >
+                          <ChevronLeft size={17} /> Предыдущий раунд
+                        </button>
+                      )}
                       {v.roundIndex < v.config.roundOrder.length - 1 &&
                         v.phase !== "finished" && (
                           <button
@@ -681,7 +794,7 @@ export function Game({
                         onClick={async () => {
                           if (
                             await confirmAction(
-                              "Начать игру заново тем же составом? Все очки, ответы и ставки обнулятся. Игроки, их порядок, пакет вопросов и выбранная панорама сохранятся. Игра начнётся с первого раунда.",
+                              "Начать игру заново тем же составом? Все очки, ответы и ставки обнулятся. Игроки, их порядок и выбранная панорама сохранятся. Будет использована актуальная опубликованная версия того же пакета. Игра начнётся с первого раунда.",
                             )
                           )
                             act("restartGame", "НАЧАТЬ ИГРУ ЗАНОВО");
@@ -691,6 +804,31 @@ export function Game({
                       </button>
                     </>
                   )}
+                  <button
+                    className="danger"
+                    disabled={v.phase === "lobby" && v.players.length === 0}
+                    onClick={async () => {
+                      if (
+                        await confirmAction(
+                          "Завершить игру? Все игроки будут отключены, очки и ответы обнулены. Откроется пустое лобби: игроки смогут войти заново. Вопросы, медиа и настройки сохранятся.",
+                          {
+                            title: "Завершить игру?",
+                            confirmLabel: "Завершить игру",
+                          },
+                        )
+                      ) {
+                        if (latestView.current.roundEpoch !== v.roundEpoch) {
+                          await showMessage(
+                            "Игра изменилась. Проверьте экран и подтвердите завершение заново.",
+                          );
+                          return;
+                        }
+                        act("endGame", "ЗАВЕРШИТЬ ИГРУ");
+                      }
+                    }}
+                  >
+                    Завершить игру
+                  </button>
                 </div>
 
                 <button
@@ -1004,11 +1142,18 @@ function PlayerColumn({
                         ? p.countryDone
                           ? "Ответил"
                           : "Выбирает страну"
-                        : p.answered
-                          ? "Ответил"
-                          : p.id === v.activePlayerId
-                            ? "Выбирает"
-                            : "В игре";
+                        : v.phase === "reveal" && v.answerResults?.[p.id]
+                          ? {
+                              correct: "Верно",
+                              partial: "Частичный зачёт",
+                              wrong: "Неверно",
+                              missing: "Нет ответа",
+                            }[v.answerResults[p.id]]
+                          : p.answered
+                            ? "Ответил"
+                            : p.id === v.activePlayerId
+                              ? "Выбирает"
+                              : "В игре";
           return (
             <div
               key={p.id}

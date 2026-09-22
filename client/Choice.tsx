@@ -28,7 +28,6 @@ export function Choice({
         <div className="anchor-event">
           <span className="muted">ОПОРНОЕ СОБЫТИЕ</span>
           <strong>{q.anchorText}</strong>
-          <b>{formatEventDate(q.anchorDate)}</b>
         </div>
       )}
       {v2 && q.round === 2 && !revealed && (

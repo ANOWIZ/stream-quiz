@@ -634,7 +634,6 @@ export function PanoramaLibrary({
               <label>
                 Пояснение после раскрытия
                 <textarea
-                  required
                   aria-label="Пояснение после раскрытия"
                   value={draft.explanation}
                   onChange={(e) => patch({ explanation: e.target.value })}

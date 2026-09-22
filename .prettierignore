@@ -1,0 +1,10 @@
+node_modules
+dist
+.local
+public/world.json
+package-lock.json
+uploads
+data
+backups
+test-results
+playwright-report

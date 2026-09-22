@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { numericScore } from "../shared/numeric-score.js";
 import type { Command, GameState, Identity } from "../shared/types.js";
 import { activeId, arm, requireRule, reveal, addPoints } from "./game.js";
 export function numericCommand(
@@ -52,28 +53,13 @@ export function numericCommand(
 export function scoreNumeric(s: GameState) {
   const q = s.question;
   if (q?.round !== 1) return;
-  const length = q.max - q.min;
   for (const id of s.roster) {
-    const a = s.answers[id];
-    if (!a?.locked) continue;
-    if (id === activeId(s) && a.value !== undefined) {
-      const error = Math.abs(q.answer - a.value) / length;
-      const tier = s.config.numeric.thresholds.findIndex(
-        (t) => error <= t + 1e-10,
-      );
-      if (tier >= 0) addPoints(s, id, s.config.numeric.activePoints[tier]);
-    } else if (
-      a.start !== undefined &&
-      a.width &&
-      q.answer >= a.start - 1e-8 &&
-      q.answer <= a.start + length * s.config.numeric[a.width] + 1e-8
-    )
-      addPoints(
-        s,
-        id,
-        a.width === "narrow"
-          ? s.config.numeric.narrowPoints
-          : s.config.numeric.widePoints,
-      );
+    const { points } = numericScore(
+      q,
+      s.answers[id],
+      id === activeId(s),
+      s.config,
+    );
+    if (points) addPoints(s, id, points);
   }
 }

@@ -106,6 +106,8 @@ export const draftSchema = z.object({
   max: z.number().optional(),
   unit: short.optional(),
   numericKind: z.enum(["number", "percent"]).optional(),
+  acceptedMin: z.union([short, z.number()]).optional(),
+  acceptedMax: z.union([short, z.number()]).optional(),
   anchorText: short.optional(),
   anchorDate: z.union([eventDateSchema, short]).optional(),
   targetDate: z.union([eventDateSchema, short]).optional(),

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import type { GameView } from "../shared/types.js";
+import { NumericResults } from "./NumericResults.js";
 import {
   comparisonLabels,
   comparisonResult,
@@ -21,6 +22,7 @@ export function Comparison({
     | "phase"
     | "config"
     | "deltas"
+    | "answerResults"
   >;
   act: (type: string, value?: unknown) => void;
 }) {
@@ -93,6 +95,8 @@ export function Comparison({
           answer: Number(q.answer),
           numericKind: q.numericKind,
           unit: q.unit ?? "",
+          acceptedMin: q.acceptedMin,
+          acceptedMax: q.acceptedMax,
         },
         guess,
         v.config,
@@ -112,7 +116,9 @@ export function Comparison({
           aria-disabled={editing ? !can : undefined}
           tabIndex={editing && can ? 0 : undefined}
           onPointerDown={(e) => {
-            if (editing && can) {
+            if (editing && can && e.button === 0) {
+              e.preventDefault();
+              e.currentTarget.focus({ preventScroll: true });
               e.currentTarget.setPointerCapture(e.pointerId);
               pointer(e);
             }
@@ -151,12 +157,9 @@ export function Comparison({
           />
           {result && (
             <path
-              d={arc(
-                Math.max(min, Number(q.answer) - result.tolerance),
-                Math.min(max, Number(q.answer) + result.tolerance),
-              )}
+              d={arc(Math.max(min, result.lower), Math.min(max, result.upper))}
               fill="none"
-              stroke="#80dcc8"
+              stroke="var(--green)"
               strokeWidth="18"
             />
           )}
@@ -176,7 +179,7 @@ export function Comparison({
             cx={marker[0]}
             cy={marker[1]}
             r="10"
-            fill="#ffd83d"
+            fill={active?.color ?? "#B7ADFF"}
             stroke="#10151e"
             strokeWidth="3"
           />
@@ -185,7 +188,7 @@ export function Comparison({
               cx={xy(Number(q.answer))[0]}
               cy={xy(Number(q.answer))[1]}
               r="7"
-              fill="#80dcc8"
+              fill="var(--green)"
               stroke="#fff"
               strokeWidth="2"
             />
@@ -212,15 +215,6 @@ export function Comparison({
         </p>
       </div>
       <div className="comparison-actions">
-        {!revealed && (
-          <p className="muted">
-            Допуск:{" "}
-            {(q.numericKind ?? (q.unit === "%" ? "percent" : "number")) ===
-            "percent"
-              ? `±${v.config.comparison.percentTolerance} п. п.`
-              : `±${Number((v.config.comparison.relativeTolerance * 100).toFixed(6))}% от правильного ответа`}
-          </p>
-        )}
         {editing && (
           <>
             <input
@@ -285,31 +279,13 @@ export function Comparison({
               </strong>
             </p>
             <p>
-              Отклонение: {Number(result.deviation.toFixed(6))} · допуск: ±
-              {Number(result.tolerance.toFixed(6))}
+              Засчитывается: {Number(result.lower.toFixed(6))}–
+              {Number(result.upper.toFixed(6))} {q.unit}
             </p>
             <p>
               Верный вариант: <strong>{comparisonLabels[result.choice]}</strong>
             </p>
-            <div className="answer-results">
-              {v.players.map((p) => (
-                <p key={p.id}>
-                  <strong style={{ color: p.color }}>{p.name}</strong>
-                  <span>
-                    {p.id === active?.id
-                      ? v.answers[p.id]?.locked
-                        ? String(guess)
-                        : "Нет ответа"
-                      : v.answers[p.id]?.locked
-                        ? comparisonLabels[
-                            v.answers[p.id].choice as ComparisonChoice
-                          ]
-                        : "Нет ответа"}
-                  </span>
-                  <b>+{v.deltas[p.id] ?? 0}</b>
-                </p>
-              ))}
-            </div>
+            <NumericResults v={v} />
           </>
         )}
       </div>

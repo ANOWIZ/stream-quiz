@@ -55,17 +55,19 @@ export interface VideoState {
   offset: number;
   changedAt: number;
 }
+export interface RoundCheckpoint {
+  round: number;
+  used: string[];
+  boardIds: string[];
+  order: string[];
+  roster: string[];
+  turn: number;
+  awards: Record<string, number>;
+}
 export interface GameState {
   roundEpoch: string | null;
-  roundCheckpoint: {
-    round: number;
-    used: string[];
-    boardIds: string[];
-    order: string[];
-    roster: string[];
-    turn: number;
-    awards: Record<string, number>;
-  } | null;
+  roundCheckpoint: RoundCheckpoint | null;
+  roundCheckpoints: Record<number, RoundCheckpoint>;
   selectedPackageId: string | null;
   packageSnapshot: GamePackage | null;
   publicIds: Record<string, string>;
@@ -127,6 +129,8 @@ export interface PublicQuestion {
   max?: number;
   unit?: string;
   numericKind?: "number" | "percent";
+  acceptedMin?: number;
+  acceptedMax?: number;
   speaker?: string;
   work?: string;
   translated?: boolean;
@@ -148,6 +152,8 @@ export interface PublicQuestion {
   studySeconds?: number;
 }
 export interface GameView {
+  canPreviousRound?: boolean;
+  answerResults?: Record<string, "correct" | "partial" | "wrong" | "missing">;
   finalCorrect?: Record<string, boolean>;
   roundEpoch: string | null;
   undoDecisionToken?: string | null;

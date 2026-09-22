@@ -1,8 +1,17 @@
 import type { GameView, Identity, PublicQuestion } from "../shared/types.js";
+import { previousRoundCheckpoint } from "./round-checkpoints.js";
 import type { Store } from "./store.js";
 import { activeId, questionToken } from "./game.js";
 import { packageSummary } from "../shared/packages.js";
-import { numericKind } from "../shared/comparison.js";
+import { numericKind, comparisonResult } from "../shared/comparison.js";
+import { numericScore } from "../shared/numeric-score.js";
+
+function categoryLabel(category: string): string {
+  return category === "Рэп / Политика · 1" || category === "Рэп / Политика · 2"
+    ? "Рэп / Политика"
+    : category;
+}
+
 export function project(
   store: Store,
   who: Identity,
@@ -23,7 +32,7 @@ export function project(
           ? "Финальная локация"
           : v2 && q.round === 5 && !revealed
             ? "Задание на память"
-            : q.category,
+            : categoryLabel(q.category),
       round: q.round,
       value: q.value,
     };
@@ -61,7 +70,7 @@ export function project(
     }
     if (q.round === 2) {
       question.anchorText = q.anchorText;
-      if (!v2 || revealed) question.anchorDate = q.anchorDate;
+      if (revealed) question.anchorDate = q.anchorDate;
       if (revealed) question.targetDate = q.targetDate;
     }
     if (q.round === 3) question.options = q.options;
@@ -78,6 +87,10 @@ export function project(
       question.explanation = q.explanation;
       question.source = q.source;
       question.alternatives = q.alternatives;
+      if (q.round === 1) {
+        question.acceptedMin = q.acceptedMin;
+        question.acceptedMax = q.acceptedMax;
+      }
       if (q.round === 3) {
         question.speaker = q.speaker;
         question.work = q.work;
@@ -127,6 +140,64 @@ export function project(
         : s.round <= 3 || s.boardIds.includes(q.id)),
   );
   return {
+    ...(revealed && q
+      ? {
+          answerResults: Object.fromEntries(
+            s.roster.map((id) => {
+              const a = s.answers[id];
+              if (q.round === 1) {
+                if (!v2)
+                  return [
+                    id,
+                    numericScore(q, a, id === activeId(s), s.config).result,
+                  ];
+                const guess = s.answers[activeId(s) ?? ""];
+                if (!a?.locked || !guess?.locked || guess.value === undefined)
+                  return [id, "missing"];
+                const result = comparisonResult(q, guess.value, s.config);
+                return [
+                  id,
+                  (
+                    id === activeId(s)
+                      ? result.correct
+                      : a.choice === result.choice
+                  )
+                    ? "correct"
+                    : "wrong",
+                ];
+              }
+              if (q.round === 2 || q.round === 3)
+                return [
+                  id,
+                  !a?.locked
+                    ? "missing"
+                    : a.choice === q.answer
+                      ? "correct"
+                      : "wrong",
+                ];
+              if (q.round === 6)
+                return [
+                  id,
+                  !s.countries[id]?.code
+                    ? "missing"
+                    : s.countries[id].code === q.answer
+                      ? "correct"
+                      : "wrong",
+                ];
+              if (a?.locked && (a.choice === "correct" || a.choice === "wrong"))
+                return [id, a.choice];
+              return [
+                id,
+                s.blocked.includes(id)
+                  ? "wrong"
+                  : (s.deltas[id] ?? 0) > 0
+                    ? "correct"
+                    : "missing",
+              ];
+            }),
+          ) as GameView["answerResults"],
+        }
+      : {}),
     ...(revealed && q?.round === 6
       ? {
           finalCorrect: Object.fromEntries(
@@ -145,6 +216,7 @@ export function project(
               )
             : null,
           canUndoDecision: !!s.lastDecision,
+          canPreviousRound: !!previousRoundCheckpoint(s),
           undoDecisionToken: s.lastDecision?.token ?? null,
         }
       : {}),
@@ -174,7 +246,10 @@ export function project(
       betDone: s.bets[p.id] !== undefined,
       countryDone: !!s.countries[p.id]?.locked,
     })),
-    self: who,
+    self: {
+      ...who,
+      name: s.players.find((p) => p.id === own)?.name ?? who.name,
+    },
     joinOpen: s.joinOpen,
     activePlayerId: activeId(s),
     order: s.order,
@@ -184,7 +259,8 @@ export function project(
     question,
     board: (s.round === 6 ? [] : rows).map((q, index) => ({
       id: v2 ? s.publicIds[q.id] : q.id,
-      category: v2 && q.round === 5 ? String(index + 1) : q.category,
+      category:
+        v2 && q.round === 5 ? String(index + 1) : categoryLabel(q.category),
       value: v2 ? 0 : q.value,
       used: s.used.includes(q.id),
     })),

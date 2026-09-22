@@ -1,5 +1,6 @@
 import { readFileSync, existsSync } from "node:fs";
 import { z } from "zod";
+import { FINAL_ANSWER_SECONDS } from "../shared/config.js";
 import type { GameState, Identity, Command } from "../shared/types.js";
 import { requireRule, arm, stopTimer, addPoints } from "./game.js";
 const world = JSON.parse(
@@ -11,10 +12,6 @@ const world = JSON.parse(
   ),
 ) as { features: { id: string }[] };
 export const countryCodes = new Set(world.features.map((f) => f.id));
-export function finalAnswerSeconds(s: GameState) {
-  // New geography locations keep their one-minute limit in older saved parties.
-  return s.question?.formatVersion === 2 ? 60 : s.config.final.seconds;
-}
 export function finishCountrySelection(s: GameState) {
   requireRule(
     s.question?.round === 6 && s.phase === "locating",
@@ -41,7 +38,7 @@ export function finalCommand(
     );
     for (const id of s.roster) if (s.bets[id] === undefined) s.bets[id] = 0;
     s.phase = "locating";
-    arm(s, finalAnswerSeconds(s), now);
+    arm(s, FINAL_ANSWER_SECONDS, now);
     return "Локация открыта; отсутствующие ставки равны нулю";
   }
   requireRule(who.role === "player" && who.playerId, "Ответ доступен игрокам");
@@ -57,7 +54,7 @@ export function finalCommand(
     s.bets[id] = bet;
     if (s.roster.every((p) => s.bets[p] !== undefined)) {
       s.phase = "locating";
-      arm(s, finalAnswerSeconds(s), now);
+      arm(s, FINAL_ANSWER_SECONDS, now);
     }
     return "Игрок сделал тайную ставку";
   }

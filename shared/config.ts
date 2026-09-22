@@ -1,4 +1,7 @@
 import { z } from "zod";
+
+export const FINAL_ANSWER_SECONDS = 60;
+
 export const ROUND_NAMES: Record<number, string> = {
   1: "Больше-меньше",
   2: "До или после",
@@ -144,7 +147,7 @@ export const defaultConfig: Config = {
     bet: 45,
     study: [30, 20, 15],
   },
-  final: { betLimit: 1, seconds: 120 },
+  final: { betLimit: 1, seconds: FINAL_ANSWER_SECONDS },
   uploads: { imageMB: 15, videoMB: 150 },
 };
 export const V2_ROUND_NAMES: Record<number, string> = {
@@ -176,9 +179,9 @@ export function upgradeConfig(config: Config = defaultConfig): Config {
 }
 export const PLAYER_COLORS = [
   "#B7ADFF",
-  "#80DCC8",
-  "#FFAD85",
   "#8CC8FF",
-  "#F2C86B",
   "#F596C3",
+  "#FFAD85",
+  "#FFFFFF",
+  "#FFD23F",
 ];

@@ -22,6 +22,7 @@ export function Final({
   const v2 = v.config.rulesVersion === 2;
   const loading = v.phase === "loadingPanorama";
   const waiting = v.phase === "awaitingReveal";
+  const canSelectCountry = !!me && !mine?.locked && v.phase === "locating";
   const reportLoading =
     v2 && !displayOnly && (loading || v.phase === "locating");
   const betValue = Number(bet);
@@ -42,7 +43,7 @@ export function Final({
                 step="1"
                 placeholder="0"
                 value={v.bets[me.id] ?? bet}
-                disabled={v.bets[me.id] !== undefined || v.paused}
+                disabled={v.bets[me.id] !== undefined}
                 onChange={(e) =>
                   setBet(e.target.value.replace(/^0+(?=\d)/, ""))
                 }
@@ -52,7 +53,6 @@ export function Final({
               className="primary big-button"
               disabled={
                 v.bets[me.id] !== undefined ||
-                v.paused ||
                 !v.roster.includes(me.id) ||
                 !validBet
               }
@@ -99,6 +99,7 @@ export function Final({
           picks={picks}
           correct={String(v.question?.answer)}
           correctPoint={v.question?.location}
+          showResultHint={v.self.role === "host"}
           disabled
         />
         <div className="winner-announcement">
@@ -189,23 +190,29 @@ export function Final({
     );
   }
   const mapActions = (
-    <div className="map-dialog-actions">
-      <button onClick={() => setOpen(false)}>Вернуться к панораме</button>
-      {me && (
-        <button
-          className="primary"
-          disabled={
-            !mine?.code || mine.locked || v.paused || v.phase !== "locating"
-          }
-          onClick={() => {
-            act("confirmCountry");
-            setOpen(false);
-          }}
-        >
-          Подтвердить страну
-        </button>
+    <>
+      {v.paused && (
+        <p className="notice map-pause-status" role="status">
+          Таймер на паузе. Можно выбирать и подтверждать страну.
+        </p>
       )}
-    </div>
+      <div className="map-dialog-actions">
+        <button onClick={() => setOpen(false)}>Вернуться к панораме</button>
+        {me && (
+          <button
+            className="primary"
+            disabled={!mine?.code || !canSelectCountry}
+            onClick={() => {
+              if (!canSelectCountry) return;
+              act("confirmCountry");
+              setOpen(false);
+            }}
+          >
+            Подтвердить страну
+          </button>
+        )}
+      </div>
+    </>
   );
   return (
     <div className="final-play">
@@ -249,7 +256,7 @@ export function Final({
           onClick={() => setOpen(true)}
         >
           <Map size={23} />
-          {me && !waiting && !mine?.locked ? "Выбрать страну" : "Открыть карту"}
+          {canSelectCountry ? "Выбрать страну" : "Открыть карту"}
         </button>
       )}
       {waiting ? (
@@ -279,14 +286,14 @@ export function Final({
             </header>
             <WorldMap
               fullscreenActions={mapActions}
+              showResultHint={v.self.role === "host"}
               selected={mine?.code}
               selectedPoint={mine?.point}
-              onSelect={(code, point) =>
-                act("country", v2 ? { code, point } : code)
-              }
-              disabled={
-                !me || mine?.locked || v.paused || v.phase !== "locating"
-              }
+              onSelect={(code, point) => {
+                if (canSelectCountry)
+                  act("country", v2 ? { code, point } : code);
+              }}
+              disabled={!canSelectCountry}
             />
             {mapActions}
           </div>
